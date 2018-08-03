@@ -138,5 +138,13 @@ public class Genome {
             .collect(Collectors.toList());
     }
 
+    public final List<String> LTClump(int k, int l, int t) {
+        return Stream.iterate(0,i->i+1).limit(text.length() - l + 1)
+                .map(i-> new Genome(text.substring(i,i+l)))
+                .map((Genome genome) -> genome.frequentWords(k))
+                .peek(System.out::println)
+                .filter((List<String> mers) -> mers.size() >= t)
+                .findFirst().orElse(new ArrayList<>());
+    }
 
 }

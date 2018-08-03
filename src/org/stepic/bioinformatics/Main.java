@@ -15,28 +15,31 @@ public class Main {
 //        Genome genome = new Genome("GGACTTACTGACGTACG");
 //        System.out.println(genome.frequentWords(3));
 //        System.out.println(Genome.reverseComplement("tgATGATCAAG"));
-        String data = new String();
-        try (FileReader fileReader = new FileReader(
-                "Vibrio_cholerae.txt");
-             BufferedReader bufferedReader = new BufferedReader(fileReader)
-        ) {
-            String line;
-            do {
-                line = bufferedReader.readLine();
-                data = data + line;
-            } while (line != null);
+//        String data = new String();
+//        try (FileReader fileReader = new FileReader(
+//                "Vibrio_cholerae.txt");
+//             BufferedReader bufferedReader = new BufferedReader(fileReader)
+//        ) {
+//            String line;
+//            do {
+//                line = bufferedReader.readLine();
+//                data = data + line;
+//            } while (line != null);
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        Genome genome = new Genome(data);
+//
+//        System.out.println(
+//                genome.findAllPossionOfThe("CTTGATCAT")
+//                .stream()
+//                .map(i->String.valueOf(i))
+//                .collect(joining(" "))
+//        );
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Genome genome = new Genome(data);
-
-        System.out.println(
-                genome.findAllPossionOfThe("CTTGATCAT")
-                .stream()
-                .map(i->String.valueOf(i))
-                .collect(joining(" "))
-        );
+        var genome = new Genome("CGGACTCGACAGATGTGAAGAACGACAATGTGAAGACTCGACACGACAGAGTGAAGAGAAGAGGAAACATTGTAA");
+        System.out.println(genome.LTClump(5,50,4));
 
     }
 
