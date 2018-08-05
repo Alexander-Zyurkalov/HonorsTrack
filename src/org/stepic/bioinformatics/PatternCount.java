@@ -90,9 +90,9 @@ public class PatternCount {
 //        }
 //        Genome genome = new Genome("GGACTTACTGACGTACG");
 
-        System.out.println(getKmers("GGACTTACTGACGTACG",3));
-        System.out.println(frequentWords("GGACTTACTGACGTACG",3));
-        System.out.println(frequentWordsAll("GGACTTACTGACGTACG",3));
-
+        System.out.println(getKmers("GACGATATACGACGATA",3));
+//        System.out.println(frequentWords("GGACTTACTGACGTACG",3));
+//        System.out.println(frequentWordsAll("GGACTTACTGACGTACG",3));
+//
     }
 }

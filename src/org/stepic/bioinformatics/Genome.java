@@ -2,31 +2,31 @@ package org.stepic.bioinformatics;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class Genome {
-    private final String text;
+public class Genome extends Sequence {
 
-    public String getText() {
-        return text;
+
+    public Genome(final String text) {
+        super(text);
+    }
+    public Genome(Sequence seq, int beginning, int length){
+        super(seq,beginning,length);
     }
 
-    public Genome(String text) {
-        this.text = text;
+    private final ConcurrentHashMap <Sequence,Integer> patternCountCache = new ConcurrentHashMap<>(length());
+
+    public int patternCount(final String pattern){
+        return patternCount(new Sequence(pattern));
     }
-
-    private final ConcurrentHashMap <String,Long> patternCountCache =
-            new ConcurrentHashMap<>();
-
-    public final long patternCount(final String pattern) {
-        Long result = patternCountCache.get(pattern);
+    public int patternCount(final Sequence pattern) {
+        Integer result = patternCountCache.get(pattern);
         if (result == null) {
-            result = Stream.iterate(0, i->i+1)
-                .limit(text.length() - pattern.length() + 1)
+            result = (int) Stream.iterate(0, i->i+1).limit(this.length() - pattern.length() + 1)
                 .filter(
-                    i -> text.substring(i, i + pattern.length()).equals(pattern)
+                    i -> this.equalsAt(pattern, i)
                 )
                 .count();
             patternCountCache.put(pattern,result);
@@ -34,34 +34,35 @@ public class Genome {
         return result;
     }
 
-    public final HashMap<String,Long> getKmers(final int k){
+    public HashMap<Sequence,Integer> getKmers(final int k){
         return Stream
-                .iterate(0,i->i+1).limit(text.length() - k + 1)
-                .map( i -> text.substring(i,i+k) )
+                .iterate(0,i->i+1).limit(this.length() - k + 1)
+                .map( i -> new Sequence(this,i,i+k) )
                 .collect(Collectors.toMap(
-                        (String str) -> str,
-                        (String str) -> patternCount(str),
-                        (Long old_value, Long new_value) -> old_value,
+                        (Sequence seq) -> seq,
+                        (Sequence seq) -> patternCount(seq),
+                        (Integer old_value, Integer
+                                new_value) -> old_value,
                         HashMap::new
                 ));
     }
-
-    public final List<String> frequentWords(final int k) {
-        Set<String> set = Stream
-            .iterate(0,i->i+1).limit(text.length() - k + 1)
-            .map( i -> text.substring(i,i+k) )
+//
+    public List<Sequence> frequentWords(final int k) {
+        Set<Sequence> set = Stream
+            .iterate(0,i->i+1).limit(this.length() - k + 1)
+            .map( i -> new Sequence(this,i,k) )
             .collect(
                     HashSet::new,
-                    (HashSet<String> hashSet, String str) -> {
-                        if (!hashSet.contains(str)) {
-                            long max = !hashSet.isEmpty() ? patternCount(hashSet.iterator().next()) : 0;
-                            long kmer = patternCount(str);
+                    (HashSet<Sequence> hashSet, Sequence seq) -> {
+                        if (!hashSet.contains(seq)) {
+                            int max = !hashSet.isEmpty() ? patternCount(hashSet.iterator().next()) : 0;
+                            int kmer = patternCount(seq);
                             if ( kmer > max) {
                                 hashSet.clear();
-                                hashSet.add(str);
+                                hashSet.add(seq);
                             }
                             else if ( kmer == max ) {
-                                hashSet.add(str);
+                                hashSet.add(seq);
                             }
                         }
                     },
@@ -69,82 +70,121 @@ public class Genome {
             );
         return new ArrayList<>(set);
     }
-
-    public final List<String> frequentWordsImp(final int k) {
-        HashMap<String, Long> kmers = getKmers(k);
-        long max = 0;
-        List<String> listOfMax = new ArrayList<>();
-        for (String key : kmers.keySet() ) {
-            if (kmers.get(key) > max ) {
-                listOfMax.clear();
-                listOfMax.add(key);
-                max = kmers.get(key);
-            }
-            else if ( kmers.get(key) == max ) {
-                listOfMax.add(key);
-            }
-        }
-        return listOfMax;
+    public HashMap<Sequence,Integer> frequentWordsWithFreq(final int k) {
+        HashMap<Sequence,Integer> map = Stream
+            .iterate(0,i->i+1).limit(this.length() - k + 1)
+            .map( i -> new Sequence(this,i,k) )
+            .collect(
+                    HashMap::new,
+                    (HashMap<Sequence,Integer> hashMap, Sequence seq) -> {
+                        if (!hashMap.containsKey(seq)) {
+                            int max = !hashMap.isEmpty() ? patternCount(hashMap.entrySet().iterator().next().getKey()) : 0;
+                            int kmer = patternCount(seq);
+                            if ( kmer > max) {
+                                hashMap.clear();
+                                hashMap.put(seq,kmer);
+                            }
+                            else if ( kmer == max ) {
+                                hashMap.put(seq,kmer);
+                            }
+                        }
+                    },
+                    HashMap::putAll
+            );
+        return map;
     }
 
-    public static final String reverseComplement(final String pattern) {
-        Function<Character, Character> reverseLetter =
-                letter -> {
-                    char result = letter;
-                    switch (letter) {
-                        case 'A':
-                            result = 'T';
-                            break;
-                        case 'a':
-                            result = 't';
-                            break;
-                        case 'T':
-                            result = 'A';
-                            break;
-                        case 't':
-                            result = 'a';
-                            break;
-                        case 'G':
-                            result = 'C';
-                            break;
-                        case 'g':
-                            result = 'c';
-                            break;
-                        case 'C':
-                            result = 'G';
-                            break;
-                        case 'c':
-                            result = 'g';
-                            break;
-                    }
-                    return result;
-                };
-
-        return Stream.iterate(pattern.length()-1,i->i-1).limit(pattern.length())
-                .map(i -> reverseLetter.apply(pattern.charAt(i)))
+    public HashMap<Sequence,Integer> fastFrequentWordsWithFreqFunctionally(final int k) {
+        HashMap<Sequence,Integer> map = Stream
+                .iterate(0,i->i+1).limit(this.length() - k + 1)
+                .map( i -> new Sequence(this,i,k) )
                 .collect(
-                        StringBuilder::new,
-                        StringBuilder::append,
-                        StringBuilder::append
-                ).toString();
+                        HashMap::new,
+                        (HashMap<Sequence,Integer> hashMap, Sequence seq) -> {
+                            if (!hashMap.containsKey(seq)) {
+                                int max = !hashMap.isEmpty() ? patternCount(hashMap.entrySet().iterator().next().getKey()) : 0;
+                                int kmer = patternCount(seq);
+                                if ( kmer > max) {
+                                    hashMap.clear();
+                                    hashMap.put(seq,kmer);
+                                }
+                                else if ( kmer == max ) {
+                                    hashMap.put(seq,kmer);
+                                }
+                            }
+                        },
+                        HashMap::putAll
+                );
+        return map;
     }
-
-    public final List<Integer> findAllPossionOfThe(final String pattern) {
+//
+    public List<Integer> findAllPositionOfThe(final Sequence pattern) {
         int k = pattern.length();
-        String reverse = reverseComplement(pattern);
         return Stream
-            .iterate(0,i->i+1).limit(text.length() - k + 1)
-            .filter(i-> text.substring(i,i+k).equals(pattern))
+            .iterate(0,i->i+1).limit(this.length() - k + 1)
+            .filter( i -> this.equalsAt(pattern, i))
             .collect(Collectors.toList());
     }
 
-    public final List<String> LTClump(int k, int l, int t) {
-        return Stream.iterate(0,i->i+1).limit(text.length() - l + 1)
-                .map(i-> new Genome(text.substring(i,i+l)))
-                .map((Genome genome) -> genome.frequentWords(k))
-                .peek(System.out::println)
-                .filter((List<String> mers) -> mers.size() >= t)
-                .findFirst().orElse(new ArrayList<>());
+    public Set<Sequence> clumpFinding(int k, int l, int t) {
+        return
+                Stream.iterate(0,i->i+1).limit(this.length() - l + 1)
+//                .parallel()
+                .map(i-> new Genome(this,i,l))
+                .map((Genome genome) -> genome.frequentWordsWithFreq(k))
+                .filter((HashMap<Sequence,Integer> mers) ->
+                        mers.size() >= 0 && mers.entrySet().iterator().next().getValue() >= t)
+                .map((HashMap<Sequence,Integer> mers) -> mers.keySet())
+                .collect(
+                        HashSet::new,
+                        HashSet::addAll,
+                        HashSet::addAll
+                );
+    }
+
+
+    public int[] computingFrequenciesImperatively(int k) {
+        var result = new int[pow.apply(k)];
+        for (int i = 0; i <= length() - k; i++) {
+            var pattern = new Sequence(this,i,k);
+            result[pattern.patternToNumber()]++;
+        }
+        return result;
+    }
+    public Map<Sequence,Integer> computingFrequenciesFunctionally(int k){
+        return Stream.iterate(0,i->i+1).limit(length() - k + 1)
+                .map(i-> new Sequence(this,i,k))
+                .collect(Collectors.toMap(
+                        (Sequence seq) -> seq,
+                        (Sequence seq ) -> 1,
+                        (value,new_value) -> value + 1,
+                        () -> new HashMap<>(pow.apply(k))
+                ));
+    }
+
+    public List<Integer> findPattern(Sequence pattern) {
+        var result = new ArrayList<Integer>();
+        for (int i = 0; i < length(); i++) {
+            if (this.equalsAt(pattern,i)){
+                result.add(i);
+            }
+        }
+        return result;
+    }
+
+    public static void main(String[] args) {
+        var text = "GGATCCTCTCGCCTGCCACCTGTCACTATCACTCGGAGGGTTAGGCCTTTAACCGAGGATAAGAAAGGTCCATACTTGTGACCATTATCGATCGTAGGACCACTGCACCAATTCTCACCATAACATAAGGCCAGCGGTGTCCCCGGCAGCTGAACTTGACCGGGCGCAGGCTTCCTAGTCCCGGGAACCGAGAGTCTACTTGCTGGCCTGGAGATGCGCTACCGCGCGACCTCACAGTCTTTCACCCCTATTAACAAAAACGCCCGTGATTGGCTAGAGAGCACGGTGGGTCTCAGATCCTGGGGGACCGGACCCGCGCTGGCTAATGGCGGTGGCCCCAGGGAGTCGGAAGAAAGGAAGCCGCGTGCTCGTTATTGACAAGTGATAGCCCGGTGGCATCCTAGGTCTATCCATTCAGTGTAGCCAACTTAATCGCATCAAGACCCTTTCACAAGCATCAGTGTCTAGCTGAAGAGATCGATGCAGGCGTATTGTGAGTTATAGCGCTTCGACAGCACGATTATGTCTTTTTATGCCTGTAAACTATATAGAGTGCGTGAGCGCCGAGTAGCCCCGGCCTGTATCGGAGGGTAATGCATGTAGTTCCCCTTAGCCGGCTGCCCGTGTTCAGCCGAATACCGTCGATGGCATAGAATATATGTGC";
+//        int[] array = new Genome(text).computingFrequencies(5);
+//        for (int i = 0; i < array.length; i++) {
+//            System.out.print(array[i]);
+//            System.out.print(' ');
+//        }
+//        System.out.println();
+//        System.out.println(new Genome(text).clumpFinding());
+//        var genome = new Genome("GACGATATACGACGATA");
+//        System.out.println(genome.findPattern(new Sequence("ATA")));
+//        System.out.println(genome.);
+
     }
 
 }
