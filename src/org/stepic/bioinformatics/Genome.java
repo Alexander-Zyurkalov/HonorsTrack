@@ -157,6 +157,41 @@ public class Genome extends Sequence {
         }
         return frequentPatterns;
     }
+
+
+    public Set<Sequence> clumpFindingHashes(int k, int l, int t) {
+        var pow_k = k <= 14 ? pow.apply(k) : Integer.MAX_VALUE;
+        var frequentPatterns = new HashSet<Sequence>();
+
+        var text = new Genome(this, 0, l);
+
+        var frequencyArray = text.computingFrequenciesHashes(k);
+//        System.out.print("frequencyArray = ");
+//        System.out.println(frequencyArray);
+        frequencyArray.forEach(
+                (Sequence key,Integer value) -> {
+                    if (value.intValue() >= t ) frequentPatterns.add(key);
+                }
+        );
+
+        for (int i = 1; i < length() - l + 1; i++) {
+            var firstPattern = new Genome(this, i - 1, k);
+//            System.out.println(firstPattern + ": " + frequencyArray.get(firstPattern));
+            frequencyArray.put(firstPattern,frequencyArray.get(firstPattern) - 1);
+//            System.out.println(firstPattern + ": " + frequencyArray.get(firstPattern));
+//            System.out.println("===================================================");
+
+            var lastPattern = new Genome(this, i + l - k, k);
+            if (frequencyArray.containsKey(lastPattern))
+                frequencyArray.put(lastPattern,frequencyArray.get(lastPattern) + 1);
+            else
+                frequencyArray.put(lastPattern, 1);
+            if (frequencyArray.get(lastPattern) >= t) frequentPatterns.add(lastPattern);
+
+        }
+
+        return frequentPatterns;
+    }
 //        return
 //                Stream.iterate(0,i->i+1).limit(this.length() - l + 1)
 ////                .parallel()
@@ -182,14 +217,31 @@ public class Genome extends Sequence {
         return result;
     }
 
+    public Map<Sequence,Integer>  computingFrequenciesHashes(int k) {
+        var pow_k = k <= 14 ? pow.apply(k) : Integer.MAX_VALUE;
+        var result = new HashMap<Sequence,Integer>();
+
+        for (int i = 0; i <= length() - k; i++) {
+            var pattern = new Sequence(this,i,k);
+//            result[pattern.patternToNumber()]++;
+            if (result.containsKey(pattern))
+                result.put(pattern,result.get(pattern) + 1);
+            else
+                result.put(pattern,1);
+        }
+        return result;
+    }
+
     public Map<Sequence,Integer> computingFrequenciesFunctionally(int k){
+        var pow_k = k <= 14 ? pow.apply(k) : Integer.MAX_VALUE;
         return Stream.iterate(0,i->i+1).limit(length() - k + 1)
+//                .parallel()
                 .map(i-> new Sequence(this,i,k))
                 .collect(Collectors.toMap(
                         (Sequence seq) -> seq,
                         (Sequence seq ) -> 1,
                         (value,new_value) -> value + 1,
-                        () -> new HashMap<>(pow.apply(k))
+                        () -> new HashMap<>(pow_k)
                 ));
     }
 
