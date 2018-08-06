@@ -32,7 +32,7 @@ public class Main {
         var start = LocalDateTime.now();
         System.out.println(start);
 
-        var clump = genome.clumpFindingHashes(40,500,3);
+        var clump = genome.clumpFindingHashes(9,500,3);
 
         var stop = LocalDateTime.now();
         System.out.println(stop);

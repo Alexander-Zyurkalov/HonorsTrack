@@ -87,7 +87,8 @@ public class Sequence {
 
     @Override
     public int hashCode() {
-        return hash == -1 ? hash = patternToNumber() : hash;
+//        return hash == -1 ? hash = patternToNumber() : hash;
+        return getText().hashCode();
     }
 
     @Override
