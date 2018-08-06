@@ -3,7 +3,6 @@ package org.stepic.bioinformatics;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Genome extends Sequence {
@@ -127,20 +126,51 @@ public class Genome extends Sequence {
     }
 
     public Set<Sequence> clumpFinding(int k, int l, int t) {
-        return
-                Stream.iterate(0,i->i+1).limit(this.length() - l + 1)
-//                .parallel()
-                .map(i-> new Genome(this,i,l))
-                .map((Genome genome) -> genome.frequentWordsWithFreq(k))
-                .filter((HashMap<Sequence,Integer> mers) ->
-                        mers.size() >= 0 && mers.entrySet().iterator().next().getValue() >= t)
-                .map((HashMap<Sequence,Integer> mers) -> mers.keySet())
-                .collect(
-                        HashSet::new,
-                        HashSet::addAll,
-                        HashSet::addAll
-                );
+        var k_pow = pow.apply(k);
+        var frequentPatterns = new HashSet<Sequence>();
+        var clump = new int[k_pow];
+
+        var text = new Genome(this, 0, l);
+        int[] frequencyArray = text.computingFrequenciesImperatively(k);
+        for (int i = 0; i < k_pow; i++) {
+            if (frequencyArray[i] >= t){
+                clump[i] = 1;
+            }
+        }
+        for (int i = 1; i < length() - l + 1; i++) {
+            var firstPattern = new Genome(this, i - 1, k);
+            int index = firstPattern.patternToNumber();
+            frequencyArray[index]--;
+
+            var lastPattern = new Genome(this, i + l - k, k);
+            index = lastPattern.patternToNumber();
+            frequencyArray[index]++;
+            if (frequencyArray[index] >= t) {
+                clump[index] = 1;
+            }
+
+        }
+        for (int i = 0; i < k_pow; i++) {
+            if (clump[i] == 1) {
+                frequentPatterns.add(numberToPattern(i,k));
+            }
+        }
+        return frequentPatterns;
     }
+//        return
+//                Stream.iterate(0,i->i+1).limit(this.length() - l + 1)
+////                .parallel()
+//                .map(i-> new Genome(this,i,l))
+//                .map((Genome genome) -> genome.frequentWordsWithFreq(k))
+//                .filter((HashMap<Sequence,Integer> mers) ->
+//                        mers.size() >= 0 && mers.entrySet().iterator().next().getValue() >= t)
+//                .map((HashMap<Sequence,Integer> mers) -> mers.keySet())
+//                .collect(
+//                        HashSet::new,
+//                        HashSet::addAll,
+//                        HashSet::addAll
+//                );
+//    }
 
 
     public int[] computingFrequenciesImperatively(int k) {
@@ -151,6 +181,7 @@ public class Genome extends Sequence {
         }
         return result;
     }
+
     public Map<Sequence,Integer> computingFrequenciesFunctionally(int k){
         return Stream.iterate(0,i->i+1).limit(length() - k + 1)
                 .map(i-> new Sequence(this,i,k))
@@ -173,17 +204,8 @@ public class Genome extends Sequence {
     }
 
     public static void main(String[] args) {
-        var text = "GGATCCTCTCGCCTGCCACCTGTCACTATCACTCGGAGGGTTAGGCCTTTAACCGAGGATAAGAAAGGTCCATACTTGTGACCATTATCGATCGTAGGACCACTGCACCAATTCTCACCATAACATAAGGCCAGCGGTGTCCCCGGCAGCTGAACTTGACCGGGCGCAGGCTTCCTAGTCCCGGGAACCGAGAGTCTACTTGCTGGCCTGGAGATGCGCTACCGCGCGACCTCACAGTCTTTCACCCCTATTAACAAAAACGCCCGTGATTGGCTAGAGAGCACGGTGGGTCTCAGATCCTGGGGGACCGGACCCGCGCTGGCTAATGGCGGTGGCCCCAGGGAGTCGGAAGAAAGGAAGCCGCGTGCTCGTTATTGACAAGTGATAGCCCGGTGGCATCCTAGGTCTATCCATTCAGTGTAGCCAACTTAATCGCATCAAGACCCTTTCACAAGCATCAGTGTCTAGCTGAAGAGATCGATGCAGGCGTATTGTGAGTTATAGCGCTTCGACAGCACGATTATGTCTTTTTATGCCTGTAAACTATATAGAGTGCGTGAGCGCCGAGTAGCCCCGGCCTGTATCGGAGGGTAATGCATGTAGTTCCCCTTAGCCGGCTGCCCGTGTTCAGCCGAATACCGTCGATGGCATAGAATATATGTGC";
-//        int[] array = new Genome(text).computingFrequencies(5);
-//        for (int i = 0; i < array.length; i++) {
-//            System.out.print(array[i]);
-//            System.out.print(' ');
-//        }
-//        System.out.println();
-//        System.out.println(new Genome(text).clumpFinding());
-//        var genome = new Genome("GACGATATACGACGATA");
-//        System.out.println(genome.findPattern(new Sequence("ATA")));
-//        System.out.println(genome.);
+        var genome = new Genome("CGGACTCGACAGATGTGAAGAACGACAATGTGAAGACTCGACACGACAGAGTGAAGAGAAGAGGAAACATTGTAA");
+        System.out.println(genome.clumpFinding(5,50,4));
 
     }
 
