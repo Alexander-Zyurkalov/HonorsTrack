@@ -255,6 +255,10 @@ public class Genome extends Sequence {
         return result;
     }
 
+    public List<Integer> skew(){
+        return new ArrayList<>();
+    }
+
     public static void main(String[] args) {
         var genome = new Genome("CGGACTCGACAGATGTGAAGAACGACAATGTGAAGACTCGACACGACAGAGTGAAGAGAAGAGGAAACATTGTAA");
         System.out.println(genome.clumpFinding(5,50,4));
