@@ -3,6 +3,7 @@ package org.stepic.bioinformatics;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Genome extends Sequence {
@@ -255,13 +256,62 @@ public class Genome extends Sequence {
         return result;
     }
 
-    public List<Integer> skew(){
-        return new ArrayList<>();
+    public List<Integer> minimumSkewImp(){
+        var result = new ArrayList<Integer>(length()+1);
+        int prev_value = 0;
+        int new_value = 0;
+        int min = length();
+        for (int i = 0; i < length(); i++) {
+            if (charAt(i) == 'G')
+                new_value = prev_value + 1;
+            else if (charAt(i) == 'C')
+                new_value = prev_value - 1;
+            else
+                new_value = prev_value;
+            if (min > new_value) {
+                min = new_value;
+                result.clear();
+                result.add(i + 1);
+            }
+            else if (min == new_value)
+                result.add(i + 1 );
+            prev_value = new_value;
+        }
+        return result;
     }
 
+
+    public List<Integer> skew() {
+        return Stream.iterate(0, i -> i + 1).limit(length())
+                .map(i -> charAt(i))
+                .map(ch -> {
+                    switch (ch) {
+                        case 'G':
+                            return 1;
+                        case 'C':
+                            return -1;
+                        default:
+                            return 0;
+                    }
+                })
+                .collect(
+                        () -> {
+                            var list = new ArrayList<Integer>(length() + 1);
+                            list.add(0);
+                            return list;
+                        },
+                        (ArrayList<Integer> list, Integer value) -> list.add(list.get(list.size() - 1) + value),
+                        ArrayList::addAll
+                );
+    }
+
+
     public static void main(String[] args) {
-        var genome = new Genome("CGGACTCGACAGATGTGAAGAACGACAATGTGAAGACTCGACACGACAGAGTGAAGAGAAGAGGAAACATTGTAA");
-        System.out.println(genome.clumpFinding(5,50,4));
+        var genome = new Genome("CCGGCCGG");
+        genome.minimumSkewImp().forEach(
+                (v) -> System.out.print(v + " ")
+        );
+        System.out.println();
 
     }
 

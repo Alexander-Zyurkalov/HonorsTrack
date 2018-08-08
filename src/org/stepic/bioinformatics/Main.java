@@ -21,7 +21,7 @@ public class Main {
     public static void main(String[] args) {
 
         String text = "";
-        try (var fileReader = new FileReader("E_coli.txt ");
+        try (var fileReader = new FileReader("dataset_7_6.txt");
              var bufferedReader = new BufferedReader(fileReader)
         ) {
             text = bufferedReader.readLine();
@@ -32,13 +32,18 @@ public class Main {
         var start = LocalDateTime.now();
         System.out.println(start);
 
-        var clump = genome.clumpFindingHashes(9,500,3);
+//        var clump = genome.clumpFindingHashes(9,500,3);
+        genome.minimumSkewImp().forEach(
+                (v) -> System.out.print(v + " ")
+        );
+        System.out.println();
 
         var stop = LocalDateTime.now();
         System.out.println(stop);
         var duration = Duration.between(start,stop);
-        System.out.println(duration.getSeconds());
-        System.out.println(clump.size());
+
+//        System.out.println(duration.getSeconds());
+//        System.out.println(clump.size());
 //        System.out.println(clump.stream().map(s->s.toString()).collect(Collectors.joining(" ")));
     }
 
