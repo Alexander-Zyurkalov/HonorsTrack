@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,35 +37,36 @@ class GenomeTest {
 
         var genome = new Genome("ACGTTGCATGTCGCATGATGCATGAGAGCT");
         var output = genome.frequentWords(4);
-        var expected = new HashSet<Sequence>();
+        var expected = new ArrayList<Sequence>();
         expected.add(new Sequence("GCAT"));
         expected.add(new Sequence("CATG"));
         assertIterableEquals(expected,output);
 
         genome = new Genome("TGGTAGCGACGTTGGTCCCGCCGCTTGAGAATCTGGATGAACATAAGCTCCCACTTGGCTTATTCAGAGAACTGGTCAACACTTGTCTCTCCCAGCCAGGTCTGACCACCGGGCAACTTTTAGAGCACTATCGTGGTACAAATAATGCTGCCAC");
         output = genome.frequentWords(3);
-        expected = new HashSet<>();
+        expected = new ArrayList<>();
         expected.add(new Sequence("TGG"));
         assertIterableEquals(expected,output);
 
         genome = new Genome("CAGTGGCAGATGACATTTTGCTGGTCGACTGGTTACAACAACGCCTGGGGCTTTTGAGCAACGAGACTTTTCAATGTTGCACCGTTTGCTGCATGATATTGAAAACAATATCACCAAATAAATAACGCCTTAGTAAGTAGCTTTT");
         output = genome.frequentWords(4);
-        expected = new HashSet<>();
+        expected = new ArrayList<>();
         expected.add(new Sequence("TTTT"));
         assertIterableEquals(expected,output);
 
         genome = new Genome("ATACAATTACAGTCTGGAACCGGATGAACTGGCCGCAGGTTAACAACAGAGTTGCCAGGCACTGCCGCTGACCAGCAACAACAACAATGACTTTGACGCGAAGGGGATGGCATGAGCGAACTGATCGTCAGCCGTCAGCAACGAGTATTGTTGCTGACCCTTAACAATCCCGCCGCACGTAATGCGCTAACTAATGCCCTGCTG");
         output = genome.frequentWords(5);
-        expected = new HashSet<>();
+        expected = new ArrayList<>();
         expected.add(new Sequence("AACAA"));
         assertIterableEquals(expected,output);
 
         genome = new Genome("CCAGCGGGGGTTGATGCTCTGGGGGTCACAAGATTGCATTTTTATGGGGTTGCAAAAATGTTTTTTACGGCAGATTCATTTAAAATGCCCACTGGCTGGAGACATAGCCCGGATGCGCGTCTTTTACAACGTATTGCGGGGTAAAATCGTAGATGTTTTAAAATAGGCGTAAC");
         output = genome.frequentWords(5);
-        expected = new HashSet<>();
+        expected = new ArrayList<>();
+        expected.add(new Sequence("TTTTA"));
         expected.add(new Sequence("AAAAT"));
         expected.add(new Sequence("GGGGT"));
-        expected.add(new Sequence("TTTTA"));
+
         assertIterableEquals(expected,output);
 
 
@@ -77,7 +77,7 @@ class GenomeTest {
     @Test
     void findAllPositionOfThe() {
         var seq = new Genome("GATATATGCATATACTT");
-        var found = seq.findAllPositionOfThe(new Sequence("ATAT"));
+        var found = seq.findAllPositionsOfThe(new Sequence("ATAT"));
         ArrayList<Integer> expected = new ArrayList<>();
         expected.add(1); expected.add(3); expected.add(9);
         assertIterableEquals(expected,found);
@@ -116,4 +116,28 @@ class GenomeTest {
         assertTrue(clumps.size() == 6);
 
     }
+
+    @Test
+    void findAllPositionsOfTheApprPattern() {
+        var genome = new Genome("CGCCCGAATCCAGAACGCATTCCCATATTTCGGGACCACTGGCCTCCACGGTACGGACGTCAATCAAAT");
+        assertIterableEquals(Arrays.asList(6, 7, 26, 27),
+                genome.findAllPositionsOfTheApprPattern(new Sequence("ATTCTGGA"), 3));
+
+        genome = new Genome("TTTTTTAAATTTTAAATTTTTT");
+        assertIterableEquals(Arrays.asList(4,5,6, 7, 8, 11, 12, 13, 14, 15),
+                genome.findAllPositionsOfTheApprPattern(new Sequence("AAA"), 2),
+                "This dataset checks if you are only counting instances where the number of mismatches is\n" +
+                        "exactly equal to d (i.e. ignoring instances where mismatch < d)");
+
+        genome = new Genome("GAGCGCTGGGTTAACTCGCTACTTCCCGACGAGCGCTGTGGCGCAAATTGGCGATGAAACTGCAGAGAGAACTGGTCATCCAACTGAATTCTCCCCGCTATCGCATTTTGATGCGCGCCGCGTCGATT");
+        assertIterableEquals(Arrays.asList(0, 30, 66),
+                genome.findAllPositionsOfTheApprPattern(new Sequence("GAGCGCTGG"), 2),
+                "This dataset checks if your code has an off-by-one error at the beginning of Text (i.e. your\n" +
+                        "code is not checking the the leftmost substring of Text).");
+
+    }
+
+
+
+
 }

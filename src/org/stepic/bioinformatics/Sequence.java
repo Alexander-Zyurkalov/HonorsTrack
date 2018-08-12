@@ -1,5 +1,7 @@
 package org.stepic.bioinformatics;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -77,12 +79,6 @@ public class Sequence {
                         StringBuilder::append
                 ).reverse().toString()
         );
-    }
-
-    public static void main(String[] args) {
-//        System.out.println(numberToPattern(5437, 8));
-//        System.out.println(new Sequence("GGACCCGAGCGGACGCAT").patternToNumberRecursively());
-        System.out.println(numberToPattern(8068,8));
     }
 
     @Override
@@ -196,4 +192,65 @@ public class Sequence {
     public boolean theyAreTheSame(Sequence seq){
         return this.getText() == seq.text;
     }
+
+    public int hammingDistance(Sequence another){
+        if (length()!= another.length())
+            return length() ;
+        return (int)Stream.iterate(0,i->i+1).limit(length())
+                .filter(i->charAt(i) != another.charAt(i))
+                .count();
+    }
+
+    public static int hammingDistance(String s1, String s2){
+        var seq = new Sequence(s1);
+        return seq.hammingDistance(new Sequence(s2));
+    }
+
+    public List<Sequence> getNeighbors(int distance){
+        var neighborhood = new ArrayList<Sequence>();
+        if (distance == 0) {
+            neighborhood.add(this);
+            return neighborhood;
+        }
+        if ((length()) == 1) {
+            neighborhood.add(new Sequence("A"));
+            neighborhood.add(new Sequence("C"));
+            neighborhood.add(new Sequence("G"));
+            neighborhood.add(new Sequence("T"));
+            return neighborhood;
+        }
+
+
+        var suffixPattern = new Sequence(
+                this,
+                1,
+                length() - 1);
+        suffixPattern.getNeighbors(distance).forEach(
+            text -> {
+
+                if (suffixPattern.hammingDistance(text) < distance){
+                    neighborhood.add(new Sequence('A' + text.getText()));
+                    neighborhood.add(new Sequence('C' + text.getText()));
+                    neighborhood.add(new Sequence('G' + text.getText()));
+                    neighborhood.add(new Sequence('T' + text.getText()));
+                }
+                else
+                    neighborhood.add(new Sequence(charAt(0) + text.getText()));
+
+
+            }
+        );
+        return neighborhood;
+    }
+
+    public static void main(String[] args) {
+        var seq = new Sequence("CCAGTCAATG");
+        System.out.println(seq.getNeighbors(1).size());
+        seq.getNeighbors(1).forEach(
+                sequence -> System.out.println(sequence)
+        );
+    }
+
+
+
 }

@@ -117,13 +117,25 @@ public class Genome extends Sequence {
                 );
         return map;
     }
+
+
 //
-    public List<Integer> findAllPositionOfThe(final Sequence pattern) {
+    public List<Integer> findAllPositionsOfThe(final Sequence pattern) {
         int k = pattern.length();
         return Stream
             .iterate(0,i->i+1).limit(this.length() - k + 1)
             .filter( i -> this.equalsAt(pattern, i))
             .collect(Collectors.toList());
+    }
+    public List<Integer> findAllPositionsOfTheApprPattern(final Sequence pattern, int searchingDifference) {
+        int k = pattern.length();
+        return Stream
+                .iterate(0,i->i+1).limit(this.length() - k + 1)
+                .filter( i -> {
+                    var seq = new Sequence(this, i, pattern.length());
+                    return seq.hammingDistance(pattern) <= searchingDifference;
+                })
+                .collect(Collectors.toList());
     }
 
     public Set<Sequence> clumpFinding(int k, int l, int t) {
@@ -167,47 +179,25 @@ public class Genome extends Sequence {
         var text = new Genome(this, 0, l);
 
         var frequencyArray = text.computingFrequenciesHashes(k);
-//        System.out.print("frequencyArray = ");
-//        System.out.println(frequencyArray);
         frequencyArray.forEach(
                 (Sequence key,Integer value) -> {
-                    if (value.intValue() >= t ) frequentPatterns.add(key);
+                    if (value >= t ) frequentPatterns.add(key);
                 }
         );
 
         for (int i = 1; i < length() - l + 1; i++) {
             var firstPattern = new Genome(this, i - 1, k);
-//            System.out.println(firstPattern + ": " + frequencyArray.get(firstPattern));
             frequencyArray.put(firstPattern,frequencyArray.get(firstPattern) - 1);
-//            System.out.println(firstPattern + ": " + frequencyArray.get(firstPattern));
-//            System.out.println("===================================================");
-
             var lastPattern = new Genome(this, i + l - k, k);
             if (frequencyArray.containsKey(lastPattern))
                 frequencyArray.put(lastPattern,frequencyArray.get(lastPattern) + 1);
             else
                 frequencyArray.put(lastPattern, 1);
             if (frequencyArray.get(lastPattern) >= t) frequentPatterns.add(lastPattern);
-
         }
 
         return frequentPatterns;
     }
-//        return
-//                Stream.iterate(0,i->i+1).limit(this.length() - l + 1)
-////                .parallel()
-//                .map(i-> new Genome(this,i,l))
-//                .map((Genome genome) -> genome.frequentWordsWithFreq(k))
-//                .filter((HashMap<Sequence,Integer> mers) ->
-//                        mers.size() >= 0 && mers.entrySet().iterator().next().getValue() >= t)
-//                .map((HashMap<Sequence,Integer> mers) -> mers.keySet())
-//                .collect(
-//                        HashSet::new,
-//                        HashSet::addAll,
-//                        HashSet::addAll
-//                );
-//    }
-
 
     public int[] computingFrequenciesImperatively(int k) {
         var result = new int[pow.apply(k)];
@@ -219,12 +209,9 @@ public class Genome extends Sequence {
     }
 
     public Map<Sequence,Integer>  computingFrequenciesHashes(int k) {
-        var pow_k = k <= 14 ? pow.apply(k) : Integer.MAX_VALUE;
         var result = new HashMap<Sequence,Integer>();
-
         for (int i = 0; i <= length() - k; i++) {
             var pattern = new Sequence(this,i,k);
-//            result[pattern.patternToNumber()]++;
             if (result.containsKey(pattern))
                 result.put(pattern,result.get(pattern) + 1);
             else
@@ -307,12 +294,10 @@ public class Genome extends Sequence {
 
 
     public static void main(String[] args) {
-        var genome = new Genome("CCGGCCGG");
-        genome.minimumSkewImp().forEach(
-                (v) -> System.out.print(v + " ")
+        System.out.println(
+                new Genome("CATTCCAGTACTTCATGATGGCGTGAAGA")
+                .skew()
         );
-        System.out.println();
-
     }
 
 }

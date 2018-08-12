@@ -73,4 +73,30 @@ class SequenceTest {
         assertEquals(14,new Sequence("TG").patternToNumberRecursively());
         assertEquals(15,new Sequence("TT").patternToNumberRecursively());
     }
+
+    @Test
+    void hammingDistance() {
+        assertEquals(4,Sequence.hammingDistance("AAAA","TTTT"));
+        assertEquals(3,Sequence.hammingDistance("GGGCCGTTGGT","GGACCGTTGAC"));
+        assertEquals(8,Sequence.hammingDistance("ACGTACGT","TACGTACG"));
+        assertEquals(6,Sequence.hammingDistance("ACGTACGT","CCCCCCCC"));
+        assertEquals(8,Sequence.hammingDistance("ACGTACGT","TGCATGCA"));
+    }
+
+    @Test
+    void getNeighbors() {
+        var seq = new Sequence("ACG");
+        var output = seq.getNeighbors(1);
+        assertEquals(10, output.size());
+        assertTrue(output.contains(new Sequence("GCG")));
+        assertTrue(output.contains(new Sequence("TCG" )));
+        assertTrue(output.contains(new Sequence("GCG")));
+        assertTrue(output.contains(new Sequence("AAG")));
+        assertTrue(output.contains(new Sequence("ATG")));
+        assertTrue(output.contains(new Sequence("AGG")));
+        assertTrue(output.contains(new Sequence("ACA")));
+        assertTrue(output.contains(new Sequence("ACC")));
+        assertTrue(output.contains(new Sequence("ACT")));
+        assertTrue(output.contains(new Sequence("ACG")));
+    }
 }

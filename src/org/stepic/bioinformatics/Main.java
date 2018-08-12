@@ -21,26 +21,35 @@ public class Main {
     public static void main(String[] args) {
 
         String text = "";
-        try (var fileReader = new FileReader("dataset_7_6.txt");
-             var bufferedReader = new BufferedReader(fileReader)
+        try (var fileReader = new FileReader("Salmonella_enterica.txt");
+             var bufferedReader = new BufferedReader(fileReader);
         ) {
-            text = bufferedReader.readLine();
+            while (true) {
+                var line = bufferedReader.readLine();
+                if ( line == null) break;
+                text = text + bufferedReader.readLine();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        var genome = new Genome(text);
+        var genome = new FuzzyGenome(text);
         var start = LocalDateTime.now();
         System.out.println(start);
 
-//        var clump = genome.clumpFindingHashes(9,500,3);
-        genome.minimumSkewImp().forEach(
-                (v) -> System.out.print(v + " ")
+        var skew = genome.minimumSkewImp();
+        skew.forEach(
+                (v) -> System.out.print("skew = " + v + " ")
         );
         System.out.println();
+
+        var window = new FuzzyGenome(genome,skew.get(0),500);
+        System.out.println(window.frequentWordsWithMismatch(9,1));
 
         var stop = LocalDateTime.now();
         System.out.println(stop);
         var duration = Duration.between(start,stop);
+
+
 
 //        System.out.println(duration.getSeconds());
 //        System.out.println(clump.size());
