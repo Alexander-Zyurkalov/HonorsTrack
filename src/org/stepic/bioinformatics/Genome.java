@@ -127,16 +127,7 @@ public class Genome extends Sequence {
             .filter( i -> this.equalsAt(pattern, i))
             .collect(Collectors.toList());
     }
-    public List<Integer> findAllPositionsOfTheApprPattern(final Sequence pattern, int searchingDifference) {
-        int k = pattern.length();
-        return Stream
-                .iterate(0,i->i+1).limit(this.length() - k + 1)
-                .filter( i -> {
-                    var seq = new Sequence(this, i, pattern.length());
-                    return seq.hammingDistance(pattern) <= searchingDifference;
-                })
-                .collect(Collectors.toList());
-    }
+
 
     public Set<Sequence> clumpFinding(int k, int l, int t) {
         var k_pow = pow.apply(k);

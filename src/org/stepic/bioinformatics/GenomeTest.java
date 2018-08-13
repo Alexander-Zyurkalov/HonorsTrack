@@ -117,25 +117,6 @@ class GenomeTest {
 
     }
 
-    @Test
-    void findAllPositionsOfTheApprPattern() {
-        var genome = new Genome("CGCCCGAATCCAGAACGCATTCCCATATTTCGGGACCACTGGCCTCCACGGTACGGACGTCAATCAAAT");
-        assertIterableEquals(Arrays.asList(6, 7, 26, 27),
-                genome.findAllPositionsOfTheApprPattern(new Sequence("ATTCTGGA"), 3));
-
-        genome = new Genome("TTTTTTAAATTTTAAATTTTTT");
-        assertIterableEquals(Arrays.asList(4,5,6, 7, 8, 11, 12, 13, 14, 15),
-                genome.findAllPositionsOfTheApprPattern(new Sequence("AAA"), 2),
-                "This dataset checks if you are only counting instances where the number of mismatches is\n" +
-                        "exactly equal to d (i.e. ignoring instances where mismatch < d)");
-
-        genome = new Genome("GAGCGCTGGGTTAACTCGCTACTTCCCGACGAGCGCTGTGGCGCAAATTGGCGATGAAACTGCAGAGAGAACTGGTCATCCAACTGAATTCTCCCCGCTATCGCATTTTGATGCGCGCCGCGTCGATT");
-        assertIterableEquals(Arrays.asList(0, 30, 66),
-                genome.findAllPositionsOfTheApprPattern(new Sequence("GAGCGCTGG"), 2),
-                "This dataset checks if your code has an off-by-one error at the beginning of Text (i.e. your\n" +
-                        "code is not checking the the leftmost substring of Text).");
-
-    }
 
 
 
