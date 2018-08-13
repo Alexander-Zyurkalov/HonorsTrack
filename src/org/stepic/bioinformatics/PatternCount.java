@@ -68,31 +68,7 @@ public class PatternCount {
         return listOfMax;
     }
 
-//    public static final List<String> freguentWordsFunc(String text, int k){
-//
-//    }
     public static void main(String[] args) {
-//        String data = new String();
-//        try (
-//                FileReader fileReader = new FileReader(
-//                        "D:\\Personal files\\Alex\\Java\\HonorsTrack\\dataset_2_7.txt");
-//                BufferedReader bufferedReader = new BufferedReader(fileReader)
-//        ) {
-//            String line;
-//            do {
-//               line = bufferedReader.readLine();
-//               data = data + line;
-//            } while (line != null);
-//            System.out.println(patternCount(data,"GCGGTGGGC"));
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        Genome genome = new Genome("GGACTTACTGACGTACG");
-
         System.out.println(getKmers("GACGATATACGACGATA",3));
-//        System.out.println(frequentWords("GGACTTACTGACGTACG",3));
-//        System.out.println(frequentWordsAll("GGACTTACTGACGTACG",3));
-//
     }
 }
