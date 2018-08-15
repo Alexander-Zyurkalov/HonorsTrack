@@ -1,5 +1,6 @@
 package org.stepic.bioinformatics;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collector;
@@ -48,6 +49,15 @@ public class FuzzyGenome extends Genome {
             ));
     }
 
+    public List<Sequence> computingFrequenciesWithMismatchesToList(int k, int d) {
+        return Stream.iterate(0, i-> i + 1).limit(length() - k + 1)
+            .parallel()
+            .map( i -> new Sequence(this,i,k))
+            .flatMap( pattern -> Stream.iterate(pattern,p->p.reverseComplement()).limit(2))
+            .flatMap( pattern -> pattern.getNeighbors(d).stream() )
+            .collect(Collectors.toList());
+    }
+
     public Set<Sequence> frequentWordsWithMismatch(int k, int d) {
         Map<Sequence,Long> frequentArray = computingFrequenciesWithMismatches(k,d);
         Sequence max = frequentArray.keySet().stream()
@@ -59,10 +69,25 @@ public class FuzzyGenome extends Genome {
                 .collect(Collectors.toSet());
     }
 
+    public static List<Sequence> motifEnumeration (List<FuzzyGenome> Dna, int k, int d){
+//        var result = new ArrayList<Sequence>();
+//        Dna.forEach(
+//                seq -> result.addAll(seq.computingFrequenciesWithMismatchesToList(k,d))
+//        );
+        return Dna.stream()
+                .flatMap(seq -> seq.computingFrequenciesWithMismatches(k,d).keySet().stream())
+                .collect(Collectors.toList());
+//        return result;
+    }
+
     public static void main(String[] args) {
-        var genome = new FuzzyGenome("CATGCCATTCGCATTGTCCCAGTGA");
-        System.out.println(
-                genome.approximatePatternCount(new Sequence("CCC"),2));
+        var list = new ArrayList<FuzzyGenome>();
+        list.add(new FuzzyGenome("ATTTGGC"));
+        list.add(new FuzzyGenome("TGCCTTA"));
+        list.add(new FuzzyGenome("CGGTATC"));
+        list.add(new FuzzyGenome("GAAAATT"));
+        System.out.println(motifEnumeration(list,3,1));
+
 
     }
 }
