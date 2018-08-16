@@ -1,9 +1,6 @@
 package org.stepic.bioinformatics;
 
-import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,36 +27,29 @@ public class FuzzyGenome extends Genome {
     }
 
     public int approximatePatternCount(Sequence pattern, int difference){
-        return (int)Stream.iterate(0,i->i+1).limit(this.length() - pattern.length() + 1)
-                .map(i -> new Sequence(this,i,pattern.length()))
+        return (int)kmerSequenceStream(pattern.length())
                 .filter(seq -> seq.hammingDistance(pattern) <= difference)
                 .count();
     }
 
+    private Stream<Sequence> computingFrequenciesWithMismatchesStream(int k, int d) {
+        return Stream.iterate(0, i-> i + 1).limit(length() - k + 1)
+                .parallel()
+                .map( i -> new Sequence(this,i,k))
+                .flatMap( pattern -> Stream.iterate(pattern,p->p.reverseComplement()).limit(2))
+                .flatMap( pattern -> pattern.getNeighbors(d).stream() )                ;
+    }
 
     public Map<Sequence,Long> computingFrequenciesWithMismatches(int k, int d) {
-        return Stream.iterate(0, i-> i + 1).limit(length() - k + 1)
-            .parallel()
-            .map( i -> new Sequence(this,i,k))
-            .flatMap( pattern -> Stream.iterate(pattern,p->p.reverseComplement()).limit(2))
-            .flatMap( pattern -> pattern.getNeighbors(d).stream() )
+        return computingFrequenciesWithMismatchesStream(k,d)
             .collect(Collectors.groupingBy(
                     pattern -> pattern,
                     Collectors.counting()
             ));
     }
 
-    public List<Sequence> computingFrequenciesWithMismatchesToList(int k, int d) {
-        return Stream.iterate(0, i-> i + 1).limit(length() - k + 1)
-            .parallel()
-            .map( i -> new Sequence(this,i,k))
-            .flatMap( pattern -> Stream.iterate(pattern,p->p.reverseComplement()).limit(2))
-            .flatMap( pattern -> pattern.getNeighbors(d).stream() )
-            .collect(Collectors.toList());
-    }
 
-    public Set<Sequence> frequentWordsWithMismatch(int k, int d) {
-        Map<Sequence,Long> frequentArray = computingFrequenciesWithMismatches(k,d);
+    private static Set<Sequence> frequentWords(Map<Sequence,Long> frequentArray) {
         Sequence max = frequentArray.keySet().stream()
                 .max(Comparator.comparingLong(frequentArray::get))
                 .orElse(new Sequence(""));
@@ -68,26 +58,42 @@ public class FuzzyGenome extends Genome {
                         frequentArray.get(pattern) == frequentArray.get(max))
                 .collect(Collectors.toSet());
     }
+    public Set<Sequence> frequentWordsWithMismatch(int k, int d) {
+        Map<Sequence,Long> frequentArray = computingFrequenciesWithMismatches(k,d);
+        return  frequentWords(frequentArray);
+    }
 
-    public static List<Sequence> motifEnumeration (List<FuzzyGenome> Dna, int k, int d){
-//        var result = new ArrayList<Sequence>();
-//        Dna.forEach(
-//                seq -> result.addAll(seq.computingFrequenciesWithMismatchesToList(k,d))
-//        );
-        return Dna.stream()
-                .flatMap(seq -> seq.computingFrequenciesWithMismatches(k,d).keySet().stream())
-                .collect(Collectors.toList());
-//        return result;
+    public static Set<Sequence> motifEnumeration (List<FuzzyGenome> Dna, int k, int d){
+        if (Dna.isEmpty()) return new HashSet<>();
+        var first_dna = Dna.get(0);
+        if (Dna.size() == 1) return first_dna.kmerSequenceStream(k).collect(Collectors.toSet());
+        Dna.remove(0);
+        return first_dna
+            .kmerSequenceStream(k)
+            .flatMap(seq -> seq.getNeighbors(d).stream())
+//            .parallel()
+            .filter(
+                seq -> Dna.stream().allMatch(
+                    dna -> dna.kmerSequenceStream(k)
+                        .anyMatch(
+                            s -> s.hammingDistance(seq) <= d
+                        )
+                )
+            ).collect(Collectors.toSet());
     }
 
     public static void main(String[] args) {
         var list = new ArrayList<FuzzyGenome>();
-        list.add(new FuzzyGenome("ATTTGGC"));
-        list.add(new FuzzyGenome("TGCCTTA"));
-        list.add(new FuzzyGenome("CGGTATC"));
-        list.add(new FuzzyGenome("GAAAATT"));
-        System.out.println(motifEnumeration(list,3,1));
-
+        list.add(new FuzzyGenome("ACAGCGAATAAAGGAATGGGCATAC"));
+        list.add(new FuzzyGenome("GTGTCAGAACGAACACCGCGCCTAA"));
+        list.add(new FuzzyGenome("GTGTTGGACGCATGAGTAGATGAAG"));
+        list.add(new FuzzyGenome("GCACAATTCTCATCTTTAGTTTAAT"));
+        list.add(new FuzzyGenome("GTACAGTTCATTGCACGGGCTGAGT"));
+        list.add(new FuzzyGenome("TCGTATGGAGCCTTTTTTCGGGAGA"));
+        motifEnumeration(list,5,2).forEach(
+            seq -> System.out.print(seq + " ")
+        );
+        System.out.println();
 
     }
 }

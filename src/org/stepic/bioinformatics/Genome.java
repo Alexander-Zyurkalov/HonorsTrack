@@ -3,7 +3,6 @@ package org.stepic.bioinformatics;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Genome extends Sequence {
@@ -17,6 +16,12 @@ public class Genome extends Sequence {
     }
 
     private final ConcurrentHashMap <Sequence,Integer> patternCountCache = new ConcurrentHashMap<>(length());
+
+    public Stream<Sequence> kmerSequenceStream(int k){
+        return Stream
+                .iterate(0,i->i+1).limit(this.length() - k + 1)
+                .map( i -> new Sequence(this, i, k) );
+    }
 
     public int patternCount(final String pattern){
         return patternCount(new Sequence(pattern));
@@ -35,9 +40,7 @@ public class Genome extends Sequence {
     }
 
     public HashMap<Sequence,Integer> getKmers(final int k){
-        return Stream
-                .iterate(0,i->i+1).limit(this.length() - k + 1)
-                .map( i -> new Sequence(this,i,i+k) )
+        return kmerSequenceStream(k)
                 .collect(Collectors.toMap(
                         (Sequence seq) -> seq,
                         (Sequence seq) -> patternCount(seq),
@@ -48,9 +51,7 @@ public class Genome extends Sequence {
     }
 //
     public List<Sequence> frequentWords(final int k) {
-        Set<Sequence> set = Stream
-            .iterate(0,i->i+1).limit(this.length() - k + 1)
-            .map( i -> new Sequence(this,i,k) )
+        Set<Sequence> set = kmerSequenceStream(k)
             .collect(
                     HashSet::new,
                     (HashSet<Sequence> hashSet, Sequence seq) -> {
@@ -71,9 +72,7 @@ public class Genome extends Sequence {
         return new ArrayList<>(set);
     }
     public HashMap<Sequence,Integer> frequentWordsWithFreq(final int k) {
-        HashMap<Sequence,Integer> map = Stream
-            .iterate(0,i->i+1).limit(this.length() - k + 1)
-            .map( i -> new Sequence(this,i,k) )
+        HashMap<Sequence,Integer> map = kmerSequenceStream(k)
             .collect(
                     HashMap::new,
                     (HashMap<Sequence,Integer> hashMap, Sequence seq) -> {
@@ -95,9 +94,7 @@ public class Genome extends Sequence {
     }
 
     public HashMap<Sequence,Integer> fastFrequentWordsWithFreqFunctionally(final int k) {
-        HashMap<Sequence,Integer> map = Stream
-                .iterate(0,i->i+1).limit(this.length() - k + 1)
-                .map( i -> new Sequence(this,i,k) )
+        HashMap<Sequence,Integer> map = kmerSequenceStream(k)
                 .collect(
                         HashMap::new,
                         (HashMap<Sequence,Integer> hashMap, Sequence seq) -> {
@@ -213,9 +210,7 @@ public class Genome extends Sequence {
 
     public Map<Sequence,Integer> computingFrequenciesFunctionally(int k){
         var pow_k = k <= 14 ? pow.apply(k) : Integer.MAX_VALUE;
-        return Stream.iterate(0,i->i+1).limit(length() - k + 1)
-//                .parallel()
-                .map(i-> new Sequence(this,i,k))
+        return kmerSequenceStream(k)
                 .collect(Collectors.toMap(
                         (Sequence seq) -> seq,
                         (Sequence seq ) -> 1,

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,7 +48,7 @@ class FuzzyGenomeTest {
 
 
     @Test
-    void fastFrequentWordsWithFreqFunctionally() {
+    void frequentWordsWithMismatch() {
         var genome = new FuzzyGenome("ACGTTGCATGTCGCATGATGCATGAGAGCT");
         ArrayList<Sequence> output = new ArrayList<>(
                 genome.frequentWordsWithMismatch(4, 1));
@@ -123,6 +124,44 @@ class FuzzyGenomeTest {
                 .stream()
                 .allMatch(str -> output3.contains(new Sequence(str)))
         );
+
+
+    }
+
+    @Test
+    void motifEnumeration() {
+
+        var list = new ArrayList<FuzzyGenome>();
+        list.add(new FuzzyGenome("ATTTGGC"));
+        list.add(new FuzzyGenome("TGCCTTA"));
+        list.add(new FuzzyGenome("CGGTATC"));
+        list.add(new FuzzyGenome("GAAAATT"));
+        final var result = FuzzyGenome.motifEnumeration(list,3,1);
+        assertTrue(result.size() == 4 &&
+                Arrays
+                    .asList("ATA ATT GTT TTT".split(" "))
+                    .stream()
+                    .allMatch(str -> result.contains(new Sequence(str)))
+        );
+
+        list = new ArrayList<FuzzyGenome>();
+        list.add(new FuzzyGenome("ACGT"));
+        list.add(new FuzzyGenome("ACGT"));
+        list.add(new FuzzyGenome("ACGT"));
+        final var result2 = FuzzyGenome.motifEnumeration(list,3,0);
+        assertTrue(result2.size() == 2 &&
+                Arrays
+                    .asList("ACG CGT".split(" "))
+                    .stream()
+                    .allMatch(str -> result2.contains(new Sequence(str)))
+                ,"This dataset checks for off\u00ADby\u00ADone errors, both at the beginning and at the end. The\n" +
+                        "3\u00ADmers “ACG” and “CGT” both appear perfectly in all 3 strings in Dna. Thus, if your output\n" +
+                        "doesn’t contain “ACG”, you are most likely not counting the first k\u00ADmer of every string.\n" +
+                        "Similarly, if your output doesn’t contain “CGT”, you are most likely not counting the last k\u00ADmer\n" +
+                        "of every string"
+        );
+
+
 
 
     }
