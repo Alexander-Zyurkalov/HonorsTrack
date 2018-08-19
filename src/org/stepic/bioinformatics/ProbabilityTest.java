@@ -3,6 +3,9 @@ package org.stepic.bioinformatics;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,4 +47,20 @@ class ProbabilityTest {
         assertEquals(7.599592208862305E-7,Probability.pr(30,4,5,3),0.001);
         assertEquals(270.0/2187.0, Probability.pr(7,3,2,2),0.00001);
     }
+
+    @Test
+    void probabilityByProfile() {
+        var profile = new HashMap<Character, List<Double>>();
+        profile.put('A', Arrays.asList(0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.9, 0.1, 0.1, 0.1, 0.3, 0.0));
+        profile.put('C', Arrays.asList(0.1, 0.6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4, 0.1, 0.2, 0.4, 0.6));
+        profile.put('G', Arrays.asList(0.0, 0.0, 1.0, 1.0, 0.9, 0.9, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0));
+        profile.put('T', Arrays.asList(0.7, 0.2, 0.0, 0.0, 0.1, 0.1, 0.0, 0.5, 0.8, 0.7, 0.3, 0.4));
+        assertEquals(0.0205753 ,
+                Probability.probabilityByProfile("TCGGGGATTTCC",profile),
+                0.0000001);
+        assertEquals(0.0 ,
+                Probability.probabilityByProfile("TCGTGGATTTCC",profile));
+
+    }
+
 }

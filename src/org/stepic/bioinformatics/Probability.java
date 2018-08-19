@@ -1,12 +1,29 @@
 package org.stepic.bioinformatics;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
 
 public class Probability {
+
+    public static double logb( double a, double b ) {
+        return Math.log(a) / Math.log(b);
+    }
+    public static double log2( double a ) {
+        if (a == 0.0)  return 0;
+        return logb(a,2);
+    }
+
+    public static double computeEntropy(Stream<Double> nums) {
+        return - nums
+            .map(p -> p * log2(p))
+            .reduce(0.0, (s, n) -> s + n);
+    }
 
     public static BigDecimal factorial(int n) {
         return Stream.iterate(1, i->i+1).limit(n)
@@ -47,22 +64,26 @@ public class Probability {
                 .orElse(BigDecimal.ZERO);
     }
 
-    public static void main(String[] args) {
-//        System.out.println();
-        final var one_strand = pr(1000,4,9,1) * 1000;
-        System.out.println(one_strand);
-//        final var one_mer = BigDecimal.valueOf(0.25);
-//        System.out.println(one_mer);
-//        final var nine_mer = Stream
-//                .iterate(one_mer,i->one_mer).limit(9)
-//                .reduce(BigDecimal::multiply).orElse(one_mer);
-//        System.out.println(nine_mer);
+    public static double probabilityByProfile(final String str,
+                                              final HashMap<Character,List<Double>> profile){
+        final List<Double> defaultArray =
+                Stream.iterate(0, i -> i + 1).limit(str.length())
+                .map(i -> 0.0)
+                .collect(Collectors.toList());
+        return Stream.iterate(0,i->i+1).limit(str.length())
+                .map(i->profile.getOrDefault(str.charAt(i),defaultArray).get(i))
+                .reduce(1.0,(m,n) -> m*n);
+    }
 
-//        System.out.println(
-//            sumNonMutuallyExclusive(
-//                DoubleStream.iterate(one_strand,i->one_strand)
-//                        .limit(500)
-//            ).doubleValue() * 1000
-//        );
+    public static void main(String[] args) {
+
+        var profile = new HashMap<Character, List<Double>>();
+        profile.put('A', Arrays.asList(0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.9, 0.1, 0.1, 0.1, 0.3, 0.0));
+        profile.put('C', Arrays.asList(0.1, 0.6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4, 0.1, 0.2, 0.4, 0.6));
+        profile.put('G', Arrays.asList(0.0, 0.0, 1.0, 1.0, 0.9, 0.9, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0));
+        profile.put('T', Arrays.asList(0.7, 0.2, 0.0, 0.0, 0.1, 0.1, 0.0, 0.5, 0.8, 0.7, 0.3, 0.4));
+        System.out.println(
+            probabilityByProfile("TCGTGGATTTCC",profile)
+        );
     }
 }

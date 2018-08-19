@@ -1,6 +1,9 @@
 package org.stepic.bioinformatics;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -70,8 +73,8 @@ public class FuzzyGenome extends Genome {
         Dna.remove(0);
         return first_dna
             .kmerSequenceStream(k)
+            .parallel()
             .flatMap(seq -> seq.getNeighbors(d).stream())
-//            .parallel()
             .filter(
                 seq -> Dna.stream().allMatch(
                     dna -> dna.kmerSequenceStream(k)
@@ -82,18 +85,42 @@ public class FuzzyGenome extends Genome {
             ).collect(Collectors.toSet());
     }
 
+    public Sequence findMostProbableKmer(final int k,
+                                         final List<Double> profileA,
+                                         final List<Double> profileC,
+                                         final List<Double> profileG,
+                                         final List<Double> profileT){
+        final var profile = new HashMap<Character,List<Double>>();
+        profile.put('A',profileA);
+        profile.put('C',profileC);
+        profile.put('G',profileG);
+        profile.put('T',profileT);
+
+        return this
+                .kmerSequenceStream(k)
+                .max(Comparator.comparingDouble(
+                        kmer -> Probability.probabilityByProfile(kmer.getText(), profile))
+                ).get();
+    }
+
     public static void main(String[] args) {
-        var list = new ArrayList<FuzzyGenome>();
-        list.add(new FuzzyGenome("ACAGCGAATAAAGGAATGGGCATAC"));
-        list.add(new FuzzyGenome("GTGTCAGAACGAACACCGCGCCTAA"));
-        list.add(new FuzzyGenome("GTGTTGGACGCATGAGTAGATGAAG"));
-        list.add(new FuzzyGenome("GCACAATTCTCATCTTTAGTTTAAT"));
-        list.add(new FuzzyGenome("GTACAGTTCATTGCACGGGCTGAGT"));
-        list.add(new FuzzyGenome("TCGTATGGAGCCTTTTTTCGGGAGA"));
-        motifEnumeration(list,5,2).forEach(
-            seq -> System.out.print(seq + " ")
-        );
-        System.out.println();
+        var start = LocalDateTime.now();
+        System.out.println(start);
+
+        var genome = new FuzzyGenome(
+                "GAGCACCACGGAGCTAGAGGGCGAAACTGGGCAGTAAGTTCAAATGTGTTACCAGGACAGATGATTACGACAATGCGACGTTATAGTGTGTCCCTGAACACCGATCGGTAATTCGCGTCTGAACAGTGAATGTAATTCTCCTCATTTTCACGGCGTTATAATACTTCCCTTACCAACGCTCTCTTGCTAGCGATCGTTGTGAGAAACCGGGCATGATGAACGTCTAAGTGTCCTTGCGCAAAGACCCCAGCCGCTTCCGGCATCTAAAGGTAGGGTGGAAATCTCGCTGAAACTAAAAAGCCAAACCTTAGGTGATGCGCATGGCCTGGGTTTCCCCGTCTTTTCATATCTGTTTAGCAGGTTGTAGGATATGGACACATTACTGTCAATTTCGCTCTTTTTTGGCGACTTGTTGGCGTCATGGACTAATCTGCTCCTTTCTACAATGGCCGTAACGTCTCGAATGGCCTGTATTCCATGATTCTAGTGCCGGACGGGTGTGAACACTGAGTACGCCCGATTTACCGCTGGTTGTCTACTCACCGGCCGGGTCTTCATCTTGGGAACATAATCGATTATAGAGCGAGAGTCAACGAGTATCTACACAACAGATATTAGAGAAACACTTCAATGCAGACTGACCAAATCCTACTTTGTTGTCGAGGCCTGGTATAGCTGTTAATGGAAATCCGTTTGACCGCTTTTCACCGATACTGGTCCACGTGGGAATCTTTTGAAGCCCACCTTTATTGACCGACACTCTGAAGACTCGAATAGAGGAAGTGTATGTTAGCATCATTTACCGGAAAGGCAGTCGCTGCCCTGACCGTTCGCCCGTAATGCGATAATGCGCAAAAAGCCCATCTACTCCTGGAATCGCTCCGCCTTGATATTCGAAGTCTTCTTTTCGAAATCCATTAATGGAAAGAGGAGGCACAATTCTGCTATCCGGCTCGCGGCCAATCGGGTAAGGATACCGCCTCACGTCTAGGGGAAACGC");
+        var result = genome.findMostProbableKmer(14,
+                Arrays.asList(0.296, 0.31, 0.169, 0.127, 0.282, 0.31, 0.268, 0.225, 0.282, 0.211, 0.239, 0.268, 0.352, 0.225),
+                Arrays.asList(0.127, 0.183, 0.296, 0.296, 0.268, 0.183, 0.155, 0.352, 0.183, 0.31, 0.296, 0.239, 0.239, 0.324),
+                Arrays.asList(0.254, 0.282, 0.268, 0.254, 0.127, 0.211, 0.296, 0.225, 0.282, 0.239, 0.324, 0.225, 0.211, 0.225),
+                Arrays.asList(0.324, 0.225, 0.268, 0.324, 0.324, 0.296, 0.282, 0.197, 0.254, 0.239, 0.141, 0.268, 0.197, 0.225)
+        ).toString();
+        System.out.println(result);
+
+        var stop = LocalDateTime.now();
+        System.out.println(stop);
+        var duration = Duration.between(start,stop);
+        System.out.println(duration.getSeconds());
 
     }
 }

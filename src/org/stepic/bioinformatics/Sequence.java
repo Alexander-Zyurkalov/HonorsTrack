@@ -69,10 +69,10 @@ public class Sequence {
 
     }
 
-    public static Sequence numberToPattern(int num, int k){
+    public static Sequence numberToPattern(long num, int k){
         return new Sequence(
             Stream.iterate(num,i-> i / 4 ).limit(k)
-                .map(i-> TO_LETTER[i % 4])
+                .map(i-> TO_LETTER[(int)(i % 4)])
                 .collect(
                         StringBuilder::new,
                         StringBuilder::append,
