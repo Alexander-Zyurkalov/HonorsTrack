@@ -64,6 +64,40 @@ public class  GenomeList extends ArrayList<FuzzyGenome> {
                 .collect(toList());
     }
 
+    public Set<Sequence> motifEnumeration (int k, int d){
+        var Dna = this;
+        if (Dna.isEmpty()) return new HashSet<>();
+        var first_dna = Dna.get(0);
+        if (Dna.size() == 1) return first_dna.kmerSequenceStream(k).collect(Collectors.toSet());
+        Dna.remove(0);
+        return first_dna
+                .kmerSequenceStream(k)
+                .parallel()
+                .flatMap(seq -> seq.getNeighbors(d).stream())
+                .filter(
+                        seq -> Dna.stream().allMatch(
+                                dna -> dna.kmerSequenceStream(k)
+                                        .anyMatch(
+                                                s -> s.hammingDistance(seq) <= d
+                                        )
+                        )
+                ).collect(Collectors.toSet());
+    }
+
+//    public
+
+//    public List<Sequence> greedyMotifSearch(int k, int t) {
+//        var Dna = this;
+//        if (Dna.isEmpty()) return new ArrayList<>();
+//        var first_dna = Dna.get(0);
+//        if (Dna.size() == 1) return first_dna.kmerSequenceStream(k).collect(Collectors.toList());
+//        return first_dna
+//                .kmerSequenceStream(k)
+//                .parallel()
+//
+//
+//
+//    }
 
     public static void main(String[] args) {
         String[] motifs = (

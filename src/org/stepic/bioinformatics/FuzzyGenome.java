@@ -66,24 +66,6 @@ public class FuzzyGenome extends Genome {
         return  frequentWords(frequentArray);
     }
 
-    public static Set<Sequence> motifEnumeration (List<FuzzyGenome> Dna, int k, int d){
-        if (Dna.isEmpty()) return new HashSet<>();
-        var first_dna = Dna.get(0);
-        if (Dna.size() == 1) return first_dna.kmerSequenceStream(k).collect(Collectors.toSet());
-        Dna.remove(0);
-        return first_dna
-            .kmerSequenceStream(k)
-            .parallel()
-            .flatMap(seq -> seq.getNeighbors(d).stream())
-            .filter(
-                seq -> Dna.stream().allMatch(
-                    dna -> dna.kmerSequenceStream(k)
-                        .anyMatch(
-                            s -> s.hammingDistance(seq) <= d
-                        )
-                )
-            ).collect(Collectors.toSet());
-    }
 
     public Sequence findMostProbableKmer(final int k,
                                          final List<Double> profileA,
