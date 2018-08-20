@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -114,4 +115,40 @@ class GenomeListTest {
         );
 
     }
+
+    @Test
+    void greedyMotifSearch() {
+        var list = new GenomeList(
+                "GGCGTTCAGGCA\n" +
+                        "AAGAATCAGTCA\n" +
+                        "CAAGGAGTTCGC\n" +
+                        "CACGTCAATCAC\n" +
+                        "CAATAATATTCG".split("\n")
+        );
+        var result = list.greedyMotifSearch(3).stream().map(FuzzyGenome::getText).sorted().collect(Collectors.toList());
+        var expected = Arrays.asList("CAG\n" +
+                "CAG\n" +
+                "CAA\n" +
+                "CAA\n" +
+                "CAA".split("\n")).stream().sorted().collect(Collectors.toList());
+        assertIterableEquals(expected,result);
+
+    }
+
+//    @Test
+//    void score() {
+//        var list = new GenomeList(
+//                "TCGGGGGTTTTT",
+//                "CCGGTGACTTAC",
+//                "ACGGGGATTTTC",
+//                "TTGGGGACTTTT",
+//                "AAGGGGACTTCC",
+//                "TTGGGGACTTCC",
+//                "TCGGGGATTCAT",
+//                "TCGGGGATTCCT",
+//                "TAGGGGAACTAC",
+//                "TCGGGTATAACC"
+//        );
+//        assertEquals(30,list.score());
+//    }
 }

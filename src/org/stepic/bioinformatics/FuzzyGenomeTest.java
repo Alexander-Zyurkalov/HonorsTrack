@@ -2,10 +2,8 @@ package org.stepic.bioinformatics;
 
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -129,10 +127,10 @@ class FuzzyGenomeTest {
     }
 
     @Test
-    void findMostProbableKmer() {
+    void profileMostProrableKmer() {
 
         var genome = new FuzzyGenome("ACCTGTTTATTGCCTAAGTTCCGAACAAACCCAATATAGCCCGAGGGCCT");
-        var result = genome.findMostProbableKmer(5,
+        var result = genome.profileMostProrableKmer(5,
                 Arrays.asList(0.2, 0.2, 0.3, 0.2, 0.3),
                 Arrays.asList(0.4, 0.3, 0.1, 0.5, 0.1),
                 Arrays.asList(0.3, 0.3, 0.5, 0.2, 0.4),
@@ -142,7 +140,7 @@ class FuzzyGenomeTest {
 
         genome = new FuzzyGenome("AGCAGCTTTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCT" +
                 "GATCTGAACTGGTTACCTGCCGTGAGTAAAT");
-        result = genome.findMostProbableKmer(8,
+        result = genome.profileMostProrableKmer(8,
                 Arrays.asList(0.7, 0.2, 0.1, 0.5, 0.4, 0.3, 0.2, 0.1),
                 Arrays.asList(0.2, 0.2, 0.5, 0.4, 0.2, 0.3, 0.1, 0.6),
                 Arrays.asList(0.1, 0.3, 0.2, 0.1, 0.2, 0.1, 0.4, 0.2),
@@ -152,7 +150,7 @@ class FuzzyGenomeTest {
 
         genome = new FuzzyGenome("TTACCATGGGACCGCTGACTGATTTCTGGCGTCAGCGTGATGCTGGTGTGGATGACA" +
                 "TTCCGGTGCGCTTTGTAAGCAGAGTTTA");
-        result = genome.findMostProbableKmer(12,
+        result = genome.profileMostProrableKmer(12,
                 Arrays.asList(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.1, 0.2, 0.3, 0.4, 0.5),
                 Arrays.asList(0.3, 0.2, 0.1, 0.1, 0.2, 0.1, 0.1, 0.4, 0.3, 0.2, 0.2, 0.1),
                 Arrays.asList(0.2, 0.1, 0.4, 0.3, 0.1, 0.1, 0.1, 0.3, 0.1, 0.1, 0.2, 0.1),

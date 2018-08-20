@@ -3,7 +3,6 @@ package org.stepic.bioinformatics;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,17 +66,19 @@ public class FuzzyGenome extends Genome {
     }
 
 
-    public Sequence findMostProbableKmer(final int k,
-                                         final List<Double> profileA,
-                                         final List<Double> profileC,
-                                         final List<Double> profileG,
-                                         final List<Double> profileT){
-        final var profile = new HashMap<Character,List<Double>>();
-        profile.put('A',profileA);
-        profile.put('C',profileC);
-        profile.put('G',profileG);
-        profile.put('T',profileT);
-
+    public Sequence profileMostProrableKmer(final int k,
+                                            final List<Double> profileA,
+                                            final List<Double> profileC,
+                                            final List<Double> profileG,
+                                            final List<Double> profileT) {
+        final var profile = new ProfileHash();
+        profile.put('A', profileA);
+        profile.put('C', profileC);
+        profile.put('G', profileG);
+        profile.put('T', profileT);
+        return profileMostProrableKmer(k, Probability.hashToList(profile));
+    }
+    public Sequence profileMostProrableKmer(final int k, ProfileList profile){
         return this
                 .kmerSequenceStream(k)
                 .max(Comparator.comparingDouble(
@@ -91,7 +92,7 @@ public class FuzzyGenome extends Genome {
 
         var genome = new FuzzyGenome(
                 "GAGCACCACGGAGCTAGAGGGCGAAACTGGGCAGTAAGTTCAAATGTGTTACCAGGACAGATGATTACGACAATGCGACGTTATAGTGTGTCCCTGAACACCGATCGGTAATTCGCGTCTGAACAGTGAATGTAATTCTCCTCATTTTCACGGCGTTATAATACTTCCCTTACCAACGCTCTCTTGCTAGCGATCGTTGTGAGAAACCGGGCATGATGAACGTCTAAGTGTCCTTGCGCAAAGACCCCAGCCGCTTCCGGCATCTAAAGGTAGGGTGGAAATCTCGCTGAAACTAAAAAGCCAAACCTTAGGTGATGCGCATGGCCTGGGTTTCCCCGTCTTTTCATATCTGTTTAGCAGGTTGTAGGATATGGACACATTACTGTCAATTTCGCTCTTTTTTGGCGACTTGTTGGCGTCATGGACTAATCTGCTCCTTTCTACAATGGCCGTAACGTCTCGAATGGCCTGTATTCCATGATTCTAGTGCCGGACGGGTGTGAACACTGAGTACGCCCGATTTACCGCTGGTTGTCTACTCACCGGCCGGGTCTTCATCTTGGGAACATAATCGATTATAGAGCGAGAGTCAACGAGTATCTACACAACAGATATTAGAGAAACACTTCAATGCAGACTGACCAAATCCTACTTTGTTGTCGAGGCCTGGTATAGCTGTTAATGGAAATCCGTTTGACCGCTTTTCACCGATACTGGTCCACGTGGGAATCTTTTGAAGCCCACCTTTATTGACCGACACTCTGAAGACTCGAATAGAGGAAGTGTATGTTAGCATCATTTACCGGAAAGGCAGTCGCTGCCCTGACCGTTCGCCCGTAATGCGATAATGCGCAAAAAGCCCATCTACTCCTGGAATCGCTCCGCCTTGATATTCGAAGTCTTCTTTTCGAAATCCATTAATGGAAAGAGGAGGCACAATTCTGCTATCCGGCTCGCGGCCAATCGGGTAAGGATACCGCCTCACGTCTAGGGGAAACGC");
-        var result = genome.findMostProbableKmer(14,
+        var result = genome.profileMostProrableKmer(14,
                 Arrays.asList(0.296, 0.31, 0.169, 0.127, 0.282, 0.31, 0.268, 0.225, 0.282, 0.211, 0.239, 0.268, 0.352, 0.225),
                 Arrays.asList(0.127, 0.183, 0.296, 0.296, 0.268, 0.183, 0.155, 0.352, 0.183, 0.31, 0.296, 0.239, 0.239, 0.324),
                 Arrays.asList(0.254, 0.282, 0.268, 0.254, 0.127, 0.211, 0.296, 0.225, 0.282, 0.239, 0.324, 0.225, 0.211, 0.225),

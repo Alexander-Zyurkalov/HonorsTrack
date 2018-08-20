@@ -4,12 +4,12 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
 
 public class Probability {
+
 
     public static double logb( double a, double b ) {
         return Math.log(a) / Math.log(b);
@@ -53,7 +53,6 @@ public class Probability {
 
     private static BigDecimal sumNonMutuallyExclusive(BigDecimal p1, BigDecimal p2){
         return p1.add(p2).add( p1.multiply(p2).negate());
-//        return p1.multiply(p2).negate();
     }
     public static BigDecimal  sumNonMutuallyExclusive(List<Double> probabilities) {
         return sumNonMutuallyExclusive(probabilities.stream().mapToDouble(n->n));
@@ -64,20 +63,40 @@ public class Probability {
                 .orElse(BigDecimal.ZERO);
     }
 
+
+    public static ProfileList hashToList(final ProfileHash profile){
+        final var profileList = new ProfileList();
+        for (Character key :
+                profile.keySet()) {
+            var list = profile.get(key);
+            for (int i = 0; i < list.size(); i++) {
+                if (profileList.size() <= i) {
+                    var hash = new HashMap<Character,Double>();
+                    hash.put(key,list.get(i));
+                    profileList.add(hash);
+                }
+                else {
+                    profileList.get(i).put(key,list.get(i));
+                }
+            }
+        }
+        return profileList;
+    }
+
     public static double probabilityByProfile(final String str,
-                                              final HashMap<Character,List<Double>> profile){
-        final List<Double> defaultArray =
-                Stream.iterate(0, i -> i + 1).limit(str.length())
-                .map(i -> 0.0)
-                .collect(Collectors.toList());
+                                              final ProfileHash profile) {
+        return probabilityByProfile(str,hashToList(profile));
+    }
+    public static double probabilityByProfile(final String str,
+                                              final ProfileList profile) {
         return Stream.iterate(0,i->i+1).limit(str.length())
-                .map(i->profile.getOrDefault(str.charAt(i),defaultArray).get(i))
+                .map(i->profile.get(i).getOrDefault(str.charAt(i),0.0))
                 .reduce(1.0,(m,n) -> m*n);
     }
 
     public static void main(String[] args) {
 
-        var profile = new HashMap<Character, List<Double>>();
+        var profile = new ProfileHash();
         profile.put('A', Arrays.asList(0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.9, 0.1, 0.1, 0.1, 0.3, 0.0));
         profile.put('C', Arrays.asList(0.1, 0.6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4, 0.1, 0.2, 0.4, 0.6));
         profile.put('G', Arrays.asList(0.0, 0.0, 1.0, 1.0, 0.9, 0.9, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0));
