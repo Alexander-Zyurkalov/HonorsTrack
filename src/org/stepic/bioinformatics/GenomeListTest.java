@@ -119,36 +119,111 @@ class GenomeListTest {
     @Test
     void greedyMotifSearch() {
         var list = new GenomeList(
-                "GGCGTTCAGGCA\n" +
+                ("GGCGTTCAGGCA\n" +
                         "AAGAATCAGTCA\n" +
                         "CAAGGAGTTCGC\n" +
                         "CACGTCAATCAC\n" +
-                        "CAATAATATTCG".split("\n")
+                        "CAATAATATTCG").split("\n")
         );
         var result = list.greedyMotifSearch(3).stream().map(FuzzyGenome::getText).sorted().collect(Collectors.toList());
-        var expected = Arrays.asList("CAG\n" +
+        var expected = Arrays.asList(
+               ("CAG\n" +
                 "CAG\n" +
                 "CAA\n" +
                 "CAA\n" +
-                "CAA".split("\n")).stream().sorted().collect(Collectors.toList());
+                "CAA").split("\n")).stream().sorted().collect(Collectors.toList());
         assertIterableEquals(expected,result);
 
+        list = new GenomeList(
+                ("GCCCAA\n" +
+                "GGCCTG\n" +
+                "AACCTA\n" +
+                "TTCCTT").split("\n")
+        );
+        result = list.greedyMotifSearch(3).stream().map(FuzzyGenome::getText).sorted().collect(Collectors.toList());
+        expected = Arrays.asList(
+               ("GCC\n" +
+               "GCC\n" +
+               "AAC\n" +
+               "TTC").split("\n")).stream().sorted().collect(Collectors.toList());
+        assertIterableEquals(expected,result);
+
+        list = new GenomeList(
+                ("GAGGCGCACATCATTATCGATAACGATTCGCCGCATTGCC\n" +
+                "TCATCGAATCCGATAACTGACACCTGCTCTGGCACCGCTC\n" +
+                "TCGGCGGTATAGCCAGAAAGCGTAGTGCCAATAATTTCCT\n" +
+                "GAGTCGTGGTGAAGTGTGGGTTATGGGGAAAGGCAGACTG\n" +
+                "GACGGCAACTACGGTTACAACGCAGCAACCGAAGAATATT\n" +
+                "TCTGTTGTTGCTAACACCGTTAAAGGCGGCGACGGCAACT\n" +
+                "AAGCGGCCAACGTAGGCGCGGCTTGGCATCTCGGTGTGTG\n" +
+                "AATTGAAAGGCGCATCTTACTCTTTTCGCTTTCAAAAAAA").split("\n")
+        );
+        result = list.greedyMotifSearch(5).stream().map(FuzzyGenome::getText).sorted().collect(Collectors.toList());
+        expected = Arrays.asList(
+               ("GAGGC\n" +
+               "TCATC\n" +
+               "TCGGC\n" +
+               "GAGTC\n" +
+               "GCAGC\n" +
+               "GCGGC\n" +
+               "GCGGC\n" +
+               "GCATC").split("\n")).stream().sorted().collect(Collectors.toList());
+        assertIterableEquals(expected,result);
+
+
+        list = new GenomeList(
+                ("GCAGGTTAATACCGCGGATCAGCTGAGAAACCGGAATGTGCGT\n" +
+                "CCTGCATGCCCGGTTTGAGGAACATCAGCGAAGAACTGTGCGT\n" +
+                "GCGCCAGTAACCCGTGCCAGTCAGGTTAATGGCAGTAACATTT\n" +
+                "AACCCGTGCCAGTCAGGTTAATGGCAGTAACATTTATGCCTTC\n" +
+                "ATGCCTTCCGCGCCAATTGTTCGTATCGTCGCCACTTCGAGTG").split("\n")
+        );
+        result = list.greedyMotifSearch(6).stream().map(FuzzyGenome::getText).sorted().collect(Collectors.toList());
+        expected = Arrays.asList(
+               ("GTGCGT\n" +
+               "GTGCGT\n" +
+               "GCGCCA\n" +
+               "GTGCCA\n" +
+               "GCGCCA").split("\n")).stream().sorted().collect(Collectors.toList());
+        assertIterableEquals(expected,result);
+
+        list = new GenomeList(
+                ("GACCTACGGTTACAACGCAGCAACCGAAGAATATTGGCAA\n" +
+                "TCATTATCGATAACGATTCGCCGGAGGCCATTGCCGCACA\n" +
+                "GGAGTCTGGTGAAGTGTGGGTTATGGGGCAGACTGGGAAA\n" +
+                "GAATCCGATAACTGACACCTGCTCTGGCACCGCTCTCATC\n" +
+                "AAGCGCGTAGGCGCGGCTTGGCATCTCGGTGTGTGGCCAA\n" +
+                "AATTGAAAGGCGCATCTTACTCTTTTCGCTTAAAATCAAA\n" +
+                "GGTATAGCCAGAAAGCGTAGTTAATTTCGGCTCCTGCCAA\n" +
+                "TCTGTTGTTGCTAACACCGTTAAAGGCGGCGACGGCAACT").split("\n")
+        );
+        result = list.greedyMotifSearch(5).stream().map(FuzzyGenome::getText).sorted().collect(Collectors.toList());
+        expected = Arrays.asList(
+               ("GCAGC\n" +
+               "TCATT\n" +
+               "GGAGT\n" +
+               "TCATC\n" +
+               "GCATC\n" +
+               "GCATC\n" +
+               "GGTAT\n" +
+               "GCAAC").split("\n")).stream().sorted().collect(Collectors.toList());
+        assertIterableEquals(expected,result);
     }
 
-//    @Test
-//    void score() {
-//        var list = new GenomeList(
-//                "TCGGGGGTTTTT",
-//                "CCGGTGACTTAC",
-//                "ACGGGGATTTTC",
-//                "TTGGGGACTTTT",
-//                "AAGGGGACTTCC",
-//                "TTGGGGACTTCC",
-//                "TCGGGGATTCAT",
-//                "TCGGGGATTCCT",
-//                "TAGGGGAACTAC",
-//                "TCGGGTATAACC"
-//        );
-//        assertEquals(30,list.score());
-//    }
+    @Test
+    void score() {
+        var list = new GenomeList(
+                "TCGGGGGTTTTT",
+                "CCGGTGACTTAC",
+                "ACGGGGATTTTC",
+                "TTGGGGACTTTT",
+                "AAGGGGACTTCC",
+                "TTGGGGACTTCC",
+                "TCGGGGATTCAT",
+                "TCGGGGATTCCT",
+                "TAGGGGAACTAC",
+                "TCGGGTATAACC"
+        );
+        assertEquals(30,list.score());
+    }
 }
