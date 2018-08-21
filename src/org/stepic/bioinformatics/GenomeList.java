@@ -130,6 +130,13 @@ public class  GenomeList extends ArrayList<FuzzyGenome> {
         return bestMotifs;
     }
 
+    // TODO continue here
+    public GenomeList greedyMotifSearchFunctional(int k) {
+        return get(0).kmerSequenceStream(k)
+                .map(kmer -> new GenomeList(kmer.getText()))  // converto to GenomeList
+                .max(Comparator.comparingInt( GenomeList::score )).get();
+    }
+
     public static void main(String[] args) {
         String[] dna = (
                 "ATGAATATCTATTATCCGTAGACTGCAGTAGCCCGTGGGACTGTGAGGTCGAATTCTCCCAATGGCCTCTAAGTACCTTCTTAGGTCAACGGCCAAGCAAAGCTACTTTGCTCCCCTAAGGAGTACTAGCCGCTCGCCCTTATTGTATTAGTCAGG\n" +
