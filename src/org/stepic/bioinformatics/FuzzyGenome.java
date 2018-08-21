@@ -78,12 +78,13 @@ public class FuzzyGenome extends Genome {
         profile.put('T', profileT);
         return profileMostProrableKmer(k, Probability.hashToList(profile));
     }
+
     public Sequence profileMostProrableKmer(final int k, ProfileList profile){
         return this
                 .kmerSequenceStream(k)
                 .max(Comparator.comparingDouble(
                         kmer -> Probability.probabilityByProfile(kmer.getText(), profile))
-                ).get();
+                ).orElse(new Sequence(this,0,k));
     }
 
     public static void main(String[] args) {
