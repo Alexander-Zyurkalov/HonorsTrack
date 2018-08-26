@@ -1,6 +1,7 @@
 package org.stepic.bioinformatics;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -96,30 +97,11 @@ public class Probability {
 
     public static void main(String[] args) {
 
-        var profile = new ProfileHash();
-        profile.put('A', Arrays.asList(0.4, 0.3, 0.0, 0.1, 0.0, 0.9));
-        profile.put('C', Arrays.asList(0.2, 0.3, 0.0, 0.4, 0.0, 0.1));
-        profile.put('G', Arrays.asList(0.1, 0.3, 1.0, 0.1, 0.5, 0.0));
-        profile.put('T', Arrays.asList(0.3, 0.1, 0.0, 0.4, 0.5, 0.0));
-        System.out.println("AGGTGA = " +
-            probabilityByProfile("AGGTGA",profile)
-        );
-        System.out.println("ACGTTA = " +
-                probabilityByProfile("ACGTTA",profile)
-        );
-        System.out.println("ATGCTA = " +
-                probabilityByProfile("ATGCTA",profile)
-        );
-        System.out.println("AAGTGA = " +
-                probabilityByProfile("AAGTGA",profile)
-        );
-        System.out.println("ACGTTT = " +
-                probabilityByProfile("ACGTTT",profile)
-        );
-        System.out.println("TCGCGA = " +
-                probabilityByProfile("TCGCGA",profile)
-        );
-        System.out.println();
-        System.out.println(probabilityByProfile("CAGTGA",profile));
+        double p1 = (600.0 - 15) / (600-15+1);
+        double p2 = 1 - p1;
+        double counter = binomialCoefficient(10,2);
+        var formatter = new DecimalFormat(".#######");
+        System.out.println(formatter.format(Math.pow(p2,2)*Math.pow(p1,8) * counter));
+
     }
 }
