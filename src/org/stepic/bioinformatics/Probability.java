@@ -97,12 +97,29 @@ public class Probability {
     public static void main(String[] args) {
 
         var profile = new ProfileHash();
-        profile.put('A', Arrays.asList(0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.9, 0.1, 0.1, 0.1, 0.3, 0.0));
-        profile.put('C', Arrays.asList(0.1, 0.6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4, 0.1, 0.2, 0.4, 0.6));
-        profile.put('G', Arrays.asList(0.0, 0.0, 1.0, 1.0, 0.9, 0.9, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0));
-        profile.put('T', Arrays.asList(0.7, 0.2, 0.0, 0.0, 0.1, 0.1, 0.0, 0.5, 0.8, 0.7, 0.3, 0.4));
-        System.out.println(
-            probabilityByProfile("TCGTGGATTTCC",profile)
+        profile.put('A', Arrays.asList(0.4, 0.3, 0.0, 0.1, 0.0, 0.9));
+        profile.put('C', Arrays.asList(0.2, 0.3, 0.0, 0.4, 0.0, 0.1));
+        profile.put('G', Arrays.asList(0.1, 0.3, 1.0, 0.1, 0.5, 0.0));
+        profile.put('T', Arrays.asList(0.3, 0.1, 0.0, 0.4, 0.5, 0.0));
+        System.out.println("AGGTGA = " +
+            probabilityByProfile("AGGTGA",profile)
         );
+        System.out.println("ACGTTA = " +
+                probabilityByProfile("ACGTTA",profile)
+        );
+        System.out.println("ATGCTA = " +
+                probabilityByProfile("ATGCTA",profile)
+        );
+        System.out.println("AAGTGA = " +
+                probabilityByProfile("AAGTGA",profile)
+        );
+        System.out.println("ACGTTT = " +
+                probabilityByProfile("ACGTTT",profile)
+        );
+        System.out.println("TCGCGA = " +
+                probabilityByProfile("TCGCGA",profile)
+        );
+        System.out.println();
+        System.out.println(probabilityByProfile("CAGTGA",profile));
     }
 }

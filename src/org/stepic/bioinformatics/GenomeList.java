@@ -34,6 +34,12 @@ public class  GenomeList extends ArrayList<FuzzyGenome> {
                 .map(findMinDistanceWithThePattern)
                 .reduce(0,Integer::sum);
     }
+    public GenomeList newGenomeList(){
+        return new GenomeList();
+    }
+    public GenomeList newGenomeList(final String... texts){
+        return new GenomeList(texts);
+    }
 
     public GenomeList(final String... texts){
         super();
@@ -44,6 +50,9 @@ public class  GenomeList extends ArrayList<FuzzyGenome> {
     public GenomeList(FuzzyGenome genome){
         super();
         this.add(genome);
+    }
+    public GenomeList newGenomeList(FuzzyGenome genome){
+        return new GenomeList(genome);
     }
 
     @VisibleForTesting
@@ -120,11 +129,11 @@ public class  GenomeList extends ArrayList<FuzzyGenome> {
 
     public GenomeList greedyMotifSearch(int k) {
 
-        var bestMotifs = new GenomeList();
+        var bestMotifs = newGenomeList();
         var kmers = get(0).kmerSequenceStream(k).collect(Collectors.toList());
         for (var kmer : kmers) {
             var motif0 = new FuzzyGenome(kmer,0,kmer.length());
-            var motifs = new GenomeList();
+            var motifs = newGenomeList();
             motifs.add(motif0);
 
             for (int i = 1; i < this.size(); i++) {
@@ -145,7 +154,7 @@ public class  GenomeList extends ArrayList<FuzzyGenome> {
                         final var iterator = this.iterator();
                         iterator.next();
                         return Stream.iterate(
-                                new GenomeList(new FuzzyGenome(kmer0,0,kmer0.length())),
+                                this.newGenomeList(new FuzzyGenome(kmer0,0,kmer0.length())),
                                 motifs -> {
                                     var profile = motifs.computeProfile();
                                     var genome = iterator.next();
@@ -155,7 +164,7 @@ public class  GenomeList extends ArrayList<FuzzyGenome> {
                                     return motifs;
                                 }
                                 ).takeWhile(gl->iterator.hasNext())
-                                .reduce(new GenomeList(),(gl1,gl2) -> gl2);
+                                .reduce(newGenomeList(),(gl1,gl2) -> gl2);
                 })
                 .min(Comparator.comparingInt( GenomeList::score )).get();
     }
