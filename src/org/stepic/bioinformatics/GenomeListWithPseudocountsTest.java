@@ -212,14 +212,16 @@ class GenomeListWithPseudocountsTest {
     void getRandomMotifs() {
 
         var list = new GenomeListWithPseudocounts("ATGCCGTA" );
-        List<String> listofList = Stream.iterate(
-                list.getRandomMotifs(3),
-                l -> list.getRandomMotifs(3)).limit(1000)
-                .map(l->l.get(0))
-                .map(l->l.getText())
+        List<String> listofList =
+            Stream.iterate(
+                    list.getRandomMotifs(3),
+                    l -> list.getRandomMotifs(3))
+                .limit(24)
+                .map(l->l.get(0).getText())
                 .distinct()
                 .sorted()
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()
+            );
         var expected = Arrays.asList(
                 ("ATG\n" +
                         "TGC\n" +
@@ -229,5 +231,90 @@ class GenomeListWithPseudocountsTest {
                         "GTA"
                 ).split("\n")).stream().sorted().collect(Collectors.toList());
         assertIterableEquals(expected,listofList);
+    }
+
+    @Test
+    void gibblsSampler() {
+        var list = new GenomeListWithPseudocounts(
+                ("CGCCCCTCTCGGGGGTGTTCAGTAAACGGCCA\n" +
+                "GGGCGAGGTATGTGTAAGTGCCAAGGTGCCAG\n" +
+                "TAGTACCGAGACCGAAAGAAGTATACAGGCGT\n" +
+                "TAGATCAAGTTTCAGGTGCACGTCGGTGAACC\n" +
+                "AATCCACCAGCTCCACGTGCAATGTTGGCCTA").split("\n")
+        );
+        var expectedMotifs = new GenomeListWithPseudocounts(
+                ("TCTCGGGG\n" +
+                "CCAAGGTG\n" +
+                "TACAGGCG\n" +
+                "TTCAGGTG\n" +
+                "TCCACGTG").split("\n"));
+
+        var randomized = list.gibblsSampler(8,2000 ,583);
+        System.out.println(expectedMotifs.score());
+        System.out.println(randomized.score());
+//        assertEquals(expectedMotifs.score(),randomized.score(),3);
+        assertEquals(expectedMotifs,randomized);
+    }
+
+    @Test
+    void getMotifWithoutStr() {
+        var motifs = new GenomeListWithPseudocounts(
+                ("TCTCGGGG\n" +
+                 "CCAAGGTG\n" +
+                 "TACAGGCG\n" +
+                 "TTCAGGTG\n" +
+                 "TCCACGTG").split("\n"));
+        var result = motifs.getMotifWithoutStr(0);
+        var expected = new GenomeListWithPseudocounts(
+            (
+            "CCAAGGTG\n" +
+            "TACAGGCG\n" +
+            "TTCAGGTG\n" +
+            "TCCACGTG").split("\n"));
+
+        assertIterableEquals(expected,result);
+
+
+        result = motifs.getMotifWithoutStr(1);
+        expected = new GenomeListWithPseudocounts(
+                (
+                "TCTCGGGG\n"  +
+                "TACAGGCG\n" +
+                "TTCAGGTG\n" +
+                "TCCACGTG"
+        ).split("\n"));
+        assertIterableEquals(expected,result);
+
+
+        result = motifs.getMotifWithoutStr(2);
+        expected = new GenomeListWithPseudocounts(
+                (
+                "TCTCGGGG\n"  +
+                "CCAAGGTG\n" +
+                "TTCAGGTG\n" +
+                "TCCACGTG"
+        ).split("\n"));
+        assertIterableEquals(expected,result);
+
+
+
+        result = motifs.getMotifWithoutStr(3);
+        expected = new GenomeListWithPseudocounts(
+                ("TCTCGGGG\n" +
+                "CCAAGGTG\n" +
+                "TACAGGCG\n" +
+                "TCCACGTG").split("\n"));
+        assertIterableEquals(expected,result);
+
+        result = motifs.getMotifWithoutStr(4);
+        expected = new GenomeListWithPseudocounts(
+                ("TCTCGGGG\n" +
+                "CCAAGGTG\n" +
+                "TACAGGCG\n" +
+                "TTCAGGTG"
+                ).split("\n"));
+        assertIterableEquals(expected,result);
+
+
     }
 }

@@ -2,10 +2,9 @@ package org.stepic.bioinformatics;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
@@ -84,6 +83,33 @@ public class Probability {
         return profileList;
     }
 
+    public static int getRandomIndexOld(final double ... probabilities){
+        final int MAX_N = 100;
+        final var rnd = new Random();
+        final int chosen = rnd.nextInt(MAX_N)+1;
+        final double sum = Arrays.stream(probabilities).sum();
+        return Stream.iterate(0,i->i+1).limit(probabilities.length).sequential()
+            .map( i -> new int[]{i,(int)Math.floor(probabilities[i]/sum * MAX_N)})
+            .flatMap(n ->
+                    Stream.iterate(0,i->i+1).limit(n[1])
+                            .map(i->n[0]))
+            .limit(chosen)
+            .reduce((r,n) -> n).orElse(0);
+    }
+    public static int getRandomIndex(final double ... probabilities){
+        final var rnd = new Random();
+        final double sum = Arrays.stream(probabilities).sum();
+        final double chosen = rnd.nextDouble()*sum;
+        final double[] sums = new double[probabilities.length+1];
+        sums[0] = 0.0;
+        for (int i = 1; i < sums.length; i++) {
+            sums[i] = (probabilities[i-1]/sum) + sums[i-1];
+            if (chosen < sums[i])
+                return i-1;
+        }
+        return 0;
+    }
+
     public static double probabilityByProfile(final String str,
                                               final ProfileHash profile) {
         return probabilityByProfile(str,hashToList(profile));
@@ -96,7 +122,7 @@ public class Probability {
     }
 
     public static void main(String[] args) {
-
+        System.out.println("result = " + getRandomIndex(1.0/6,2.0/6,3.0/6));
         double p1 = (600.0 - 15) / (600-15+1);
         double p2 = 1 - p1;
         double counter = binomialCoefficient(10,2);

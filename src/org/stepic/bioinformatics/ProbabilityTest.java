@@ -4,8 +4,17 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ProbabilityTest {
 
@@ -61,4 +70,45 @@ class ProbabilityTest {
 
     }
 
+    @Test
+    void getRandomIndex() {
+        assertEquals(2, Probability.getRandomIndex(0.0,0.0,1.0),
+                "there are only one choice");
+        assertEquals(1, Probability.getRandomIndex(0.0,1.0,0.0),
+                "there are only one choice");
+        assertEquals(0, Probability.getRandomIndex(1.0,0.0,0.0),
+                "there are only one choice");
+        assertEquals(0, Probability.getRandomIndex(0.0,0.0,0.0),
+                "there is no probabilities");
+
+        final int MAX_I = 1000;
+        Map<Integer,Long> oneAndTwo = Stream.iterate(0, i->i+1).limit(MAX_I)
+            .map(i-> Probability.getRandomIndex(0.0,0.5,0.5))
+            .collect(groupingBy(n->n,counting()));
+        assertEquals(2,oneAndTwo.size());
+        assertTrue(oneAndTwo.containsKey(1));
+        assertTrue(oneAndTwo.containsKey(2));
+        assertEquals(oneAndTwo.get(1),oneAndTwo.get(2),MAX_I/5,"1 must be equal 2");
+
+
+        Map<Integer,Long> zeroAndOneAndTwo = Stream.iterate(0, i->i+1).limit(MAX_I)
+                .map(i-> Probability.getRandomIndex(0.2,0.4,0.4))
+                .collect(groupingBy(n->n,counting()));
+        assertEquals(3,zeroAndOneAndTwo.size());
+        assertTrue(zeroAndOneAndTwo.containsKey(0));
+        assertTrue(zeroAndOneAndTwo.containsKey(1));
+        assertTrue(zeroAndOneAndTwo.containsKey(2));
+        assertEquals(MAX_I*0.2,zeroAndOneAndTwo.get(0),MAX_I/5,
+                "proportion of 0 must be 0.2*1000");
+        assertEquals(MAX_I*0.4,zeroAndOneAndTwo.get(1),MAX_I/5,
+                "proportion of 1 must be 0.4*1000");
+        assertEquals(MAX_I*0.4,zeroAndOneAndTwo.get(2),MAX_I/5,
+                "proportion of 1 must be 0.4*1000");
+        assertEquals(MAX_I,
+                zeroAndOneAndTwo.get(0)+
+                zeroAndOneAndTwo.get(1)+
+                zeroAndOneAndTwo.get(2)
+                ,1000/5,
+                "sum of proportions must be 1000");
+    }
 }

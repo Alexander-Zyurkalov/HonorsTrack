@@ -6,6 +6,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.stepic.bioinformatics.Probability.probabilityByProfile;
+
 public class FuzzyGenome extends Genome {
     public FuzzyGenome(final String text) {
         super(text);
@@ -86,6 +88,14 @@ public class FuzzyGenome extends Genome {
                         kmer -> Probability.probabilityByProfile(kmer.getText(), profile))
                 ).orElse(new Sequence(this,0,k));
     }
+
+    public double[] getProbabilityVector(int k, ProfileList profile) {
+        return kmerSequenceStream(k)
+                .mapToDouble(kmer -> probabilityByProfile(kmer.getText(),profile) )
+                .toArray();
+    }
+
+
 
     public static void main(String[] args) {
         var start = LocalDateTime.now();
